@@ -1,0 +1,152 @@
+.wrapper_folder
+{
+	position: relative;
+	float: left;
+	width: 150px;
+	margin-right: 10px;
+}
+
+.folder{
+	border: solid 2px black;
+	width: 150px;
+	height: 150px;
+	margin: 5px;
+	white-space:nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	float: left;
+	cursor: pointer;
+	background-size: cover;
+}
+
+.add_folder
+{
+	border: solid 1px black;
+	width: 35px;
+	height: 35px;
+	float: right;
+	margin-top: 5px;
+	line-height: 35px;
+	text-align: center;
+	cursor: pointer;	
+	position: absolute;
+	top: 110px;
+	right: -3px;
+	color: green;
+	border-color: green;
+}
+
+.folder_name
+{
+	border: solid 2px black;
+	width: 150px;
+	height: 70px;
+	margin: 5px;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+.file{
+	border: solid 2px black;
+	width: 90%;
+	height: 35px;
+	margin: 5px;
+	line-height: 35px;
+	/*white-space:nowrap;*/
+	/*overflow: hidden;*/
+	/*text-overflow: ellipsis;*/
+	/*float: left;*/
+	/*cursor: pointer;*/
+	float: left;
+}
+
+.add_file
+{
+	border: solid 1px black;
+	width: 35px;
+	height: 35px;
+	float: left;
+	margin-top: 5px;
+	line-height: 35px;
+	text-align: center;
+	cursor: pointer;
+}
+
+
+.label{
+	float: left;
+	width: 100%;
+}
+
+.clear
+{
+	clear: both;
+}
+
+#content_left
+{
+	/*float: left;*/
+	margin-right: 460px;
+	position: absolute;
+	/*width: 50%;*/
+}
+
+#content_right
+{
+	float: right;
+	//margin-left:: -450px;
+	width: 450px;
+}
+
+.clear_playlist
+{
+	width: 120px;
+	height: 40px;
+	border: solid 1px black;
+	margin-bottom: 10px;
+	cursor: pointer;
+	text-align: center;
+	line-height: 40px;
+}
+
+#folders, #files
+{
+	width: 100%;
+	float: left;
+}
+/*
+
+div.jp-audio ul.jp-controls {
+    padding: 20px 20px 0;
+    width: 100%;
+}
+
+
+div.jp-audio {
+    width: 90%;
+}
+
+div.jp-audio div.jp-type-playlist div.jp-progress {
+    left: 166px;
+    width: 60%;
+}
+
+
+div.jp-audio div.jp-volume-bar {
+    right: 0px;
+    top: 37px;
+}
+*/
+
+.jp-volume-bar-value
+{
+	display: block !important;
+}
+
+.directory-up
+{
+    background-image: url('music/Music/images/up.jpeg');
+    background-size: 120px;
+    background-position: center;
+    background-repeat: no-repeat
+}
