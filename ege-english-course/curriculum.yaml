@@ -40,7 +40,7 @@ exam:
           core_code: 1.4.9
           includes_elements_of: [1.4.6, 1.4.8]
           excludes: [1.4.2]
-          note: "Эссе по таблице/диаграмме с элементами проекта и делового письма. CV нет."
+          note: "Эссе в официальном стиле на основе таблицы или диаграммы. CV нет."
   oral:
     duration_minutes: 17
     tasks:
@@ -251,7 +251,7 @@ modules:
     topic: К
     grammar: [2.4.17, 2.3.5]
     vocabulary: [neutral_style_essay_38]
-    notes: "Сгущение элементов делового письма и проекта внутри 38. Не делать целью лексику 2.3.10. CV нет."
+    notes: "Сгущение официального стиля 38. Не делать целью лексику 2.3.10. CV нет."
     phonetics: [listing_and_complex_tone]
     reading: [1.3.4]
     listening: [1.2.2]
