@@ -19,7 +19,7 @@ CHROME_PROFILE = Path("/tmp/ege-chrome-pdf-profile")
 
 LANDSCAPE = {
     "03-curriculum/curriculum-detailed.md",
-    "03-curriculum/russia-strand.md",
+    "03-curriculum/english-world-strand.md",
     "03-curriculum/phonetics-strand.md",
     "03-curriculum/solutions-mapping.md",
     "03-curriculum/cumulative-checklist.md",

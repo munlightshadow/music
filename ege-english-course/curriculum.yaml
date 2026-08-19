@@ -7,7 +7,7 @@ course:
   content_base:
     year_1: "Solutions Intermediate 3rd edition, Introduction + Units 1-9"
     year_2: "Solutions Upper-Intermediate 3rd edition, Introduction + Units 1-9"
-    policy: "Keep unit order. Drop non-EGE goals. Add 37/38/4, Russia longread strand, phonetics strand."
+    policy: "Keep unit order. Drop non-EGE goals. Add 37/38/4, Russia longread, English World texts, phonetics strand."
   max_primary_score: 82
   written_max: 62
   oral_max: 20
@@ -67,6 +67,7 @@ checking:
   language: cumulative_only_taught_topics
   tutor_products_every_module: [37, 38, 4]
   russia_longread: auto_checked
+  english_world: auto_checked
   phonetics: cumulative_steps_1_to_N
 
 strands:
@@ -75,6 +76,11 @@ strands:
     checking: automatic
     also_in_productive_tasks: true
     mapping: 03-curriculum/russia-strand.md
+  english_world:
+    format: three_short_texts_per_module
+    checking: automatic
+    countries: [UK, USA, Canada, Australia, New Zealand, Ireland]
+    mapping: 03-curriculum/english-world-strand.md
   phonetics:
     order: kodifikator_A_then_C_then_B_then_read_aloud
     mapping: 03-curriculum/phonetics-strand.md

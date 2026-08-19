@@ -22,8 +22,9 @@
 
 Exam Skills Trainer (после каждых двух юнитов) — **стратегии** оставляем, форматы подменяем на КИМ ЕГЭ.
 
-Culture Bank (9 уроков в каждом томе) — опора для темы стран изучаемого языка.  
+Culture Bank (9 уроков в каждом томе) — **доп. чтение**, не замена English World.  
 Россия — сквозной слой всех 20 модулей: [russia-strand.md](russia-strand.md).  
+English World — три коротких текста на модуль: [english-world-strand.md](english-world-strand.md).  
 Фонетика — сквозной слой по порядку: [phonetics-strand.md](phonetics-strand.md).  
 Сводная таблица «из юнита + добавить + убрать» по всем столбцам: [curriculum-detailed.md](curriculum-detailed.md).
 
@@ -183,12 +184,12 @@ Introduction Upper — повтор времён. Для сильного 11-к�
 
 | Линия | В учебнике | Решение |
 | --- | --- | --- |
-| Тема | Gestures; When in Rome; Kite Runner; celebrations | **Ядро Р** стран языка (Culture Bank). Россия: лонгрид *Russian customs and celebrations* |
+| Тема | Gestures; When in Rome; Kite Runner; celebrations | **Ядро** культурных особенностей. Страны языка: English World модуля 14. Россия: лонгрид *Russian customs and celebrations* |
 | Грамматика | Modals present/future; modals in the past (needn't have) | Present/future modals **берём**. Needn't have / didn't need to **не разворачивать** |
 | Word skills | American English | Не цель ЕГЭ. Орфографию BrE держим как норму курса |
 | Writing | A blog post | **Выбросить** |
 | Speaking | Topic presentation: celebrations | Не формат 4. **Заменить на 4:** два праздника / две традиции (фото) |
-| Culture Bank | Erasmus, Aborigines/Maori и т.д. | **Берём выборочно под Р** |
+| Culture Bank | Erasmus, Aborigines/Maori и т.д. | **Доп. чтение**, не вместо English World |
 | Добавить | — | Тема **Е** (язык в жизни) хорошо встаёт рядом с Erasmus / customs |
 
 ### Модуль 15 ← Unit 4. Holidays and tourism
@@ -277,7 +278,7 @@ Introduction Upper — повтор времён. Для сильного 11-к�
 | Н | СМИ | Int 8, Upper 1 press, Upper 7 media wars | Закрыто |
 | О | Технологии, интернет-безопасность | Int 5; Upper 1 vloggers | Безопасность **дописать** в 6 |
 | П | Проблемы цивилизации | Upper 2 crime; Upper 8 protest | Закрыто со 2 года; в году 1 — точечно (homelessness) |
-| Р | Своя страна и страны языка | Culture Bank; Upper 3 customs | Страны языка — Culture Bank. **Россия — все 20 модулей**, см. russia-strand |
+| Р | Своя страна и страны языка | Culture Bank; Upper 3 customs | Страны языка — **English World все 20 модулей**. Россия — все 20, см. russia-strand |
 | С | Выдающиеся люди | Int 6, Int 7 artists, Upper 1 fame | Закрыто |
 
 ## Покрытие грамматики ЕГЭ
@@ -339,6 +340,7 @@ Introduction Upper — повтор времён. Для сильного 11-к�
 1. Форматы КИМ: 37, 38 по таблице/диаграмме, устная 1–4.  
 2. Несплошные тексты под каждое 38.  
 3. Лонгриды «Россия» на 20 модулей + автоупражнения.  
+3a. English World: 3 коротких текста × 20 модулей про англоязычные страны.  
 4. Школа (Г), роль языка (Е), большой спорт (И) — добор лексики юнита.  
 5. Системная аффиксация.  
 6. It / There / связки look-seem-feel; вопросы всех типов; Conditional 0; It takes; предлоги пакетом.  

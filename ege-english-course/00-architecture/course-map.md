@@ -17,7 +17,7 @@
 
 Контентная база: *Solutions Intermediate 3rd* на модули 1–10, *Solutions Upper-Intermediate 3rd* на 11–20 (в каждом томе Introduction + 9 юнитов). Порядок юнитов сохраняем; разбор keep/drop — [solutions-mapping.md](../03-curriculum/solutions-mapping.md).
 
-В каждом рабочем модуле поверх юнита: лонгрид «Россия» ([russia-strand.md](../03-curriculum/russia-strand.md)) и шаг фонетики ([phonetics-strand.md](../03-curriculum/phonetics-strand.md)).
+В каждом рабочем модуле поверх юнита: лонгрид «Россия» ([russia-strand.md](../03-curriculum/russia-strand.md)), блок English World ([english-world-strand.md](../03-curriculum/english-world-strand.md)) и шаг фонетики ([phonetics-strand.md](../03-curriculum/phonetics-strand.md)).
 
 ## Маршруты ученика
 

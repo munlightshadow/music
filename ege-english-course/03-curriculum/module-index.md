@@ -17,11 +17,12 @@
 - 38 — эссе в официальном стиле по таблице или диаграмме;
 - задание 4 — монолог по двум фото;
 - **Россия** — лонгрид + автоупражнения + вопрос в продуктивной части;
+- **English World** — три коротких текста про разные англоязычные страны;
 - **фонетика** — один шаг кодификатора по порядку;
 - РКЗ и организация — полностью;
 - язык — накопительно **только по взятым в цели** темам.
 
-Сквозные слои: [russia-strand.md](russia-strand.md), [phonetics-strand.md](phonetics-strand.md).
+Сквозные слои: [russia-strand.md](russia-strand.md), [english-world-strand.md](english-world-strand.md), [phonetics-strand.md](phonetics-strand.md).
 
 ## Модуль 0 — вводный
 
@@ -59,32 +60,32 @@
 | 19 | U8 Change the world | **П + М** | Cond II; unless/provided; climate; **report → каркас 38** | Cond III, mixed; Complex Object как тема | стихийные бедствия/вселенная; сборка КИМ 1–3 устной |
 | 20 | U9 Consumerism | **З** + предэкзамен | shopping; participles; photo comparison | cleft/emphasis; money idioms; letter to newspaper | мода/карманные деньги; **вторая половина модуля — мок ЕГЭ** |
 
-## Россия и фонетика в каждом модуле
+## Россия, English World и фонетика в каждом модуле
 
-Подробности: [russia-strand.md](russia-strand.md), [phonetics-strand.md](phonetics-strand.md).
+Подробности: [russia-strand.md](russia-strand.md), [english-world-strand.md](english-world-strand.md), [phonetics-strand.md](phonetics-strand.md), полные блоки — [curriculum-detailed.md](curriculum-detailed.md).
 
-| № | Юнит | Лонгрид «Россия» (автопроверка) | Фонетика (порядок кодификатора) |
-| --- | --- | --- | --- |
-| 1 | Holidays | *Where Russians go on holiday* — климат, моря, горы | А.1 правила чтения, словесное ударение |
-| 2 | Generations | *Family across generations in Russia* | А.2 [iː]–[ɪ] |
-| 3 | Leisure | *What Russian teens do after school* | А.2 [uː]–[u] |
-| 4 | Human body | *Health habits and medical science in Russia* | А.2 [ɔː]–[ɒ] |
-| 5 | Home | *Home in Russia: city flat, dacha, village* | А.2 [ɑː]–[ʌ] |
-| 6 | Technology | *From Gagarin to gadgets: Russian tech* | А.3 [ð]/[θ] |
-| 7 | High flyers | *School, exams and careers in Russia* | А.4 [w]–[v] |
-| 8 | Artists | *Russian arts the world knows* | А.5 [ɔː]–[ɜː] |
-| 9 | Messages | *How Russia talks: media and everyday contact* | А.6 linking r |
-| 10 | Journeys | *Crossing Russia: regions, cities, distances* | А.7 слабые формы |
-| 11 | Friends | *Growing up in Russia* | А.8 паузы |
-| 12 | Fame | *Russians the world has heard of* | А.9 фразовое ударение |
-| 13 | Problems | *Challenges in Russian cities and regions* | А.10 нисходящий тон |
-| 14 | Customs | *Russian customs and celebrations* | А.11 восходящий тон |
-| 15 | Holidays & tourism | *Must-see Russia* | В контуры по типу предложения |
-| 16 | Relationships | *Friends, family and hospitality in Russia* | Б.1 аспирация |
-| 17 | Health | *Sport in Russia* | Б.2–Б.3 долгота, без палатализации |
-| 18 | Tall stories | *Pages of Russian history* | Б.4 + чтение вслух (задание 1) |
-| 19 | Change the world | *Russia and the world* | Б.5–Б.6 логическое ударение, ритм |
-| 20 | Consumerism | *Everyday Russia now* + автотест по 1–19 | сборка 2.1.1–2.1.2, мок |
+| № | Юнит | Лонгрид «Россия» | English World (3 коротких текста) | Фонетика |
+| --- | --- | --- | --- | --- |
+| 1 | Holidays | *Where Russians go on holiday* | UK seaside; US parks; Australia Outback | правила чтения, словесное ударение |
+| 2 | Generations | *Family across generations in Russia* | England family; US Thanksgiving; Ireland | [iː]–[ɪ] |
+| 3 | Leisure | *What Russian teens do after school* | England football; US high school; NZ outdoors | [uː]–[u] |
+| 4 | Human body | *Health habits and medical science in Russia* | Fleming; Banting; Australia sun | [ɔː]–[ɒ] |
+| 5 | Home | *Home in Russia: city flat, dacha, village* | London; New York; Canada homes | [ɑː]–[ʌ] |
+| 6 | Technology | *From Gagarin to gadgets: Russian tech* | Turing/WWW; Silicon Valley; Canadarm | [ð]/[θ] |
+| 7 | High flyers | *School, exams and careers in Russia* | UK exams; US college; Australia Year 12 | [w]–[v] |
+| 8 | Artists | *Russian arts the world knows* | Beatles/Shakespeare; Hollywood; Dublin | [ɔː]–[ɜː] |
+| 9 | Messages | *How Russia talks* | BBC; US news; Australia media | linking r |
+| 10 | Journeys | *Crossing Russia* | UK four nations; US states; Canada | слабые формы |
+| 11 | Friends | *Growing up in Russia* | UK school; US prom; NZ school | паузы |
+| 12 | Fame | *Russians the world has heard of* | UK names; US names; Australians | фразовое ударение |
+| 13 | Problems | *Challenges in Russian cities* | London; US city; Australian cities | нисходящий тон |
+| 14 | Customs | *Russian customs and celebrations* | Bonfire Night; 4th of July; St Patrick | восходящий тон |
+| 15 | Holidays & tourism | *Must-see Russia* | London+Edinburgh; NYC+Canyon; Sydney+Uluru | контуры предложений |
+| 16 | Relationships | *Friends, family and hospitality in Russia* | UK politeness; US first names; mateship | аспирация [p t k] |
+| 17 | Health | *Sport in Russia* | Wimbledon; Super Bowl; All Blacks | долгота, без палатализации |
+| 18 | Tall stories | *Pages of Russian history* | British history; US history; Northern Ireland | шкала + чтение вслух |
+| 19 | Change the world | *Russia and the world* | Newton/Darwin; NASA; NZ nature | логическое ударение, ритм |
+| 20 | Consumerism | *Everyday Russia now* + автотест 1–19 | UK shop; US mall; Canada labels + автотест | сборка и мок |
 
 ## Продуктивные задания (принцип)
 
@@ -103,5 +104,5 @@
 
 ## Контроль полноты
 
-После 1–20 закрываются учебник + доборы mapping + **все подтемы России** + **фонетика А→В→Б→чтение вслух**.  
+После 1–20 закрываются учебник + доборы mapping + **все подтемы родной страны** + **все подтемы стран изучаемого языка** + **фонетика**.  
 Сознательно не закрываем: 2.4.6, 2.4.7, 2.4.34, 2.4.39, 2.4.40, 2.4.41, идиомы, словосложение, конверсию, CV, отдельное деловое письмо.
