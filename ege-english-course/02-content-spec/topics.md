@@ -22,4 +22,8 @@
 | Р | Родная страна и страны изучаемого языка: география, столицы, города, регионы, образование, достопримечательности, культура, история. Россия и мир: вклад в культуру, науку, технику |
 | С | Выдающиеся люди родной страны и стран изучаемого языка |
 
-Черновая привязка к модулям — в [module-index.md](../03-curriculum/module-index.md). Разбор по юнитам Solutions — в [solutions-mapping.md](../03-curriculum/solutions-mapping.md).
+**Россия** из темы Р (и выдающиеся люди родной страны из С) — сквозной слой всех 20 модулей: лонгрид + автоупражнения + вопрос в 37/38/4. Раскладка: [russia-strand.md](../03-curriculum/russia-strand.md).
+
+Страны изучаемого языка закрывает Culture Bank Solutions, пик в модуле 14.
+
+Черновая привязка юнитов — в [module-index.md](../03-curriculum/module-index.md). Разбор Solutions — в [solutions-mapping.md](../03-curriculum/solutions-mapping.md).

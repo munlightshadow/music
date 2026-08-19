@@ -17,12 +17,14 @@
 | Тема речи, близкая к А–С | Идиомы, пословицы, словосложение как навык, конверсия | Задание **37** в формате ЕГЭ |
 | Грамматика из проверяемых ~30 кодов | Conditional III, mixed conditionals, инверсия, порядок прилагательных, ought to, Complex Subject/Object, Future Perfect Continuous, have something done, cleft/emphasis, subjunctive | Задание **38**: эссе **в официальном стиле по таблице или диаграмме** |
 | Фразовые глаголы, аффиксация, сочетаемость | Деловая лексика 2.3.10 как цель; CV | Задание **4** (монолог по двум фото) |
-| Чтение/аудио + стратегии (gist, matching, MCQ, gapped) | Жанры письма учебника: blog, narrative, review, forum, complaint letter, newspaper letter, for/against, opinion essay как конечный продукт | Несплошной текст под 38; фонетика задания 1 |
+| Чтение/аудио + стратегии (gist, matching, MCQ, gapped) | Жанры письма учебника: blog, narrative, review, forum, complaint letter, newspaper letter, for/against, opinion essay как конечный продукт | Несплошной текст под 38; лонгрид «Россия»; шаг фонетики |
 | Photo comparison / photo description | Role-play и interview как замена задания 4 (их можно оставить в Zoom) | Клише 37/38/4 с модуля 1 |
 
 Exam Skills Trainer (после каждых двух юнитов) — **стратегии** оставляем, форматы подменяем на КИМ ЕГЭ.
 
-Culture Bank (9 уроков в каждом томе) — опора для темы **Р** (страны языка). Тему **Россия** дописываем сами.
+Culture Bank (9 уроков в каждом томе) — опора для темы **Р** в части **стран языка**.  
+Россия — сквозной слой всех 20 модулей: [russia-strand.md](russia-strand.md).  
+Фонетика — сквозной слой по порядку кодификатора: [phonetics-strand.md](phonetics-strand.md).
 
 ---
 
@@ -34,9 +36,9 @@ Culture Bank (9 уроков в каждом томе) — опора для т�
 | --- | --- | --- |
 | Тема | Holidays; adjectives feelings/personality | **Берём.** Тема **Л** (туризм) + кусок **Б**. Семья (**А**) здесь слабая — вплетём в 37/38/4 про каникулы с семьёй |
 | Грамматика | Present tense contrast; articles; will / going to | **Берём:** 2.4.24 Present Simple/Continuous, 2.4.28 артикли, 2.4.25 will/going to. **Добавить:** Present Continuous для будущего; типы предложений и вопросы 2.4.1/2.4.13; There is / It 2.4.3–2.4.4 минимум |
-| Writing | нет отдельного H | **Добавить** полный 37 + 38 с первой сдачи |
-| Speaking | нет photo task | **Добавить** задание 4: два вида отдыха |
-| Выбросить | — | — |
+| Writing | нет отдельного H | **Добавить** полный 37 + 38 с первой сдачи (вопрос про Россию) |
+| Speaking | нет photo task | **Добавить** задание 4: два вида отдыха (в т.ч. российский) |
+| Россия / фонетика | нет | Лонгрид *Where Russians go on holiday*; фонетика А.1 |
 
 ### Модуль 2 ← Unit 1. Generations
 
@@ -48,7 +50,7 @@ Culture Bank (9 уроков в каждом томе) — опора для т�
 | Reading / Listening | Adolescence, gapped; listening specific | **Берём** как 1.3.2 / 1.2.2 |
 | Writing | A message (polite requests) | **Заменить на 37.** Вежливость и просьбы вписать в письмо другу |
 | Speaking | Role-play: advising exchange student; *should / ought to* | Role-play → **Zoom**. Ought to **не цель** (2.4.41). **Задание 4:** семья / поколения / два способа решить конфликт |
-| Добавить | — | Клише 37; фонетика: словесное ударение |
+| Добавить | — | Клише 37; лонгрид России (семья); фонетика [iː]–[ɪ] |
 
 ### Модуль 3 ← Unit 2. Leisure time
 
@@ -150,7 +152,7 @@ Introduction Upper — повтор времён. Для сильного 11-к�
 | --- | --- | --- |
 | Тема | Friends; life events | **А/Ж** повтор |
 | Грамматика | Present and future tenses; past tenses; PP simple and continuous; verb patterns | **Берём как входной повтор** 2.4.24 + 2.4.18 (verb + -ing). Не разворачивать новый «третий кондиционал» |
-| Добавить | нет H/G как в юнитах | Полные 37 / 38 / 4 сразу; фонетика ритм/паузы; интернет-безопасность, если копим к U1 Fame/media |
+| Добавить | нет H/G как в юнитах | Полные 37 / 38 / 4 сразу; лонгрид России; фонетика: паузы |
 
 ### Модуль 12 ← Unit 1. Fame
 
@@ -180,7 +182,7 @@ Introduction Upper — повтор времён. Для сильного 11-к�
 
 | Линия | В учебнике | Решение |
 | --- | --- | --- |
-| Тема | Gestures; When in Rome; Kite Runner; celebrations | **Ядро Р** (страны языка, культурные особенности). **Россию дописать** |
+| Тема | Gestures; When in Rome; Kite Runner; celebrations | **Ядро Р** стран языка (Culture Bank). Россия: лонгрид *Russian customs and celebrations* |
 | Грамматика | Modals present/future; modals in the past (needn't have) | Present/future modals **берём**. Needn't have / didn't need to **не разворачивать** |
 | Word skills | American English | Не цель ЕГЭ. Орфографию BrE держим как норму курса |
 | Writing | A blog post | **Выбросить** |
@@ -274,7 +276,7 @@ Introduction Upper — повтор времён. Для сильного 11-к�
 | Н | СМИ | Int 8, Upper 1 press, Upper 7 media wars | Закрыто |
 | О | Технологии, интернет-безопасность | Int 5; Upper 1 vloggers | Безопасность **дописать** в 6 |
 | П | Проблемы цивилизации | Upper 2 crime; Upper 8 protest | Закрыто со 2 года; в году 1 — точечно (homelessness) |
-| Р | Своя страна и страны языка | Culture Bank; Upper 3 customs | **Россия — самим.** Страны языка — Culture Bank |
+| Р | Своя страна и страны языка | Culture Bank; Upper 3 customs | Страны языка — Culture Bank. **Россия — все 20 модулей**, см. russia-strand |
 | С | Выдающиеся люди | Int 6, Int 7 artists, Upper 1 fame | Закрыто |
 
 ## Покрытие грамматики ЕГЭ
@@ -307,7 +309,7 @@ Introduction Upper — повтор времён. Для сильного 11-к�
 
 Словообразование: системно только Int 3 word families. Остальную аффиксацию **дописываем** поверх юнитов (префиксы dis-/re-/un-/in-, суффиксы -ment/-tion/-ful и т.д.). Не делаем целью compounds из Int 2 / Upper 1 / Upper 6.
 
-Фонетика: в Upper есть word stress, intonation for meaning, fast speech — **кусочно берём**. Чтение вслух и обязательные контрасты звуков — **авторский слой**, пик в модуле 18.
+Фонетика: порядок шагов 1–20 задан в [phonetics-strand.md](phonetics-strand.md). Куски Solutions (word stress, intonation) — доп. практика, не ломают порядок. Чтение вслух собирается в модулях 18–20.
 
 ---
 
@@ -335,10 +337,10 @@ Introduction Upper — повтор времён. Для сильного 11-к�
 
 1. Форматы КИМ: 37, 38 по таблице/диаграмме, устная 1–4.  
 2. Несплошные тексты под каждое 38.  
-3. Россия в теме Р.  
-4. Школа (Г), роль языка (Е), большой спорт (И) — добор лексики.  
+3. Лонгриды «Россия» на 20 модулей + автоупражнения.  
+4. Школа (Г), роль языка (Е), большой спорт (И) — добор лексики юнита.  
 5. Системная аффиксация.  
 6. It / There / связки look-seem-feel; вопросы всех типов; Conditional 0; It takes; предлоги пакетом.  
-7. Фонетика задания 1.  
+7. Фонетика по шагам 1–20 (не одним уроком).  
 8. Интернет-безопасность.  
 9. Накопительный фидбек тьютора — этого в учебнике нет по определению.

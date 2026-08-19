@@ -20,7 +20,7 @@
 | [vocabulary.md](vocabulary.md) | 2.3 лексика |
 | [word-formation.md](word-formation.md) | 2.3.11–2.3.13 словообразование |
 | [grammar.md](grammar.md) | 2.4 грамматика |
-| [phonetics.md](phonetics.md) | 2.1 фонетика |
+| [phonetics.md](phonetics.md) | 2.1 фонетика; порядок по модулям — [phonetics-strand.md](../03-curriculum/phonetics-strand.md) |
 | [spelling-punctuation.md](spelling-punctuation.md) | 2.2 орфография и пунктуация |
 | [skills.md](skills.md) | 1.1–1.4 виды речевой деятельности |
 | [topics.md](topics.md) | таблица 4, темы А–С |
