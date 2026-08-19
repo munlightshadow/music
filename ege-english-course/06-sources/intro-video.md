@@ -7,4 +7,10 @@
 - [../04-intro-video/slides.md](../04-intro-video/slides.md)
 - [../04-intro-video/script.md](../04-intro-video/script.md)
 
-В исходнике есть незакрытая помета: добавить из файлов «мр Пч» и «мр Уч» примеры работ с выполненным заданием, удачные и неудачные.
+Вводный модуль для ученика (шаблоны и примеры задания 4 из мр УЧ):
+
+- [../03-curriculum/intro-student/task-4.md](../03-curriculum/intro-student/task-4.md)
+- [../03-curriculum/intro-student/task-37.md](../03-curriculum/intro-student/task-37.md)
+- [../03-curriculum/intro-student/task-38.md](../03-curriculum/intro-student/task-38.md)
+
+Помета исходника про примеры: **мр УЧ** разобран (устная часть). **мр Пч** (письменная) ещё не прикреплён.

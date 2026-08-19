@@ -21,7 +21,7 @@ routing:
     strong_grade_11:
       start: 11
       working_path: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-      modules_1_10: base_access
+      modules_1_10: always_open
   unresolved:
     - strong_grade_10
     - weak_grade_11
@@ -31,7 +31,7 @@ routing:
   year_2:
     id: advanced
     modules: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    modules_1_10: base_for_strong_grade_11
+    modules_1_10: always_open
 
 exam:
   written:
@@ -87,6 +87,7 @@ strands:
 
 modules:
   keep_unit_order: true
+  grid_approved: true
   mapping: 03-curriculum/solutions-mapping.md
   detailed: 03-curriculum/curriculum-detailed.md
   items:
