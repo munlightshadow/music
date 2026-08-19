@@ -7,10 +7,10 @@
 - [../04-intro-video/slides.md](../04-intro-video/slides.md)
 - [../04-intro-video/script.md](../04-intro-video/script.md)
 
-Вводный модуль для ученика (шаблоны и примеры задания 4 из мр УЧ):
+Вводный модуль для ученика:
 
-- [../03-curriculum/intro-student/task-4.md](../03-curriculum/intro-student/task-4.md)
-- [../03-curriculum/intro-student/task-37.md](../03-curriculum/intro-student/task-37.md)
-- [../03-curriculum/intro-student/task-38.md](../03-curriculum/intro-student/task-38.md)
+- [../03-curriculum/intro-student/task-4.md](../03-curriculum/intro-student/task-4.md) — из мр УЧ
+- [../03-curriculum/intro-student/task-37.md](../03-curriculum/intro-student/task-37.md) — из мр Пч
+- [../03-curriculum/intro-student/task-38.md](../03-curriculum/intro-student/task-38.md) — из мр Пч
 
-Помета исходника про примеры: **мр УЧ** разобран (устная часть). **мр Пч** (письменная) ещё не прикреплён.
+Помета исходника про примеры: **мр УЧ** (устная) и **мр Пч** (письменная) разобраны. Заметки: [mr-uch-oral.md](mr-uch-oral.md), [mr-pch-written.md](mr-pch-written.md).

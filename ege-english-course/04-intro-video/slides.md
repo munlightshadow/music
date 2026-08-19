@@ -1,7 +1,8 @@
 # Слайды вводного видео
 
 Источник: «ТЕКСТ ДЛЯ СЛАЙДОВ».  
-Примеры задания 4 (удачные и неудачные) — в [intro-student/task-4.md](../03-curriculum/intro-student/task-4.md), из мр УЧ. Примеры 37/38 — когда появится мр Пч.
+Примеры задания 4 — в [task-4.md](../03-curriculum/intro-student/task-4.md), из мр УЧ.  
+Примеры 37 и 38 — в [task-37.md](../03-curriculum/intro-student/task-37.md) и [task-38.md](../03-curriculum/intro-student/task-38.md), из мр Пч.
 
 ## Слайд 1 — Заставка
 
