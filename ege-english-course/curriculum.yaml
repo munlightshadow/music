@@ -1,0 +1,273 @@
+# Машиночитаемая карта курса подготовки к ЕГЭ по английскому.
+# Сетка модулей 1–20 — черновик, пока автор не утвердит канон.
+
+course:
+  name: "Подготовка к ЕГЭ по английскому языку"
+  country: RF
+  exam: EGE
+  max_primary_score: 82
+  written_max: 62
+  oral_max: 20
+
+routing:
+  diagnostic_before_intro: true
+  intro_module_shared: true
+  year_1:
+    id: basic
+    modules: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+  year_2:
+    id: advanced
+    modules: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+  year_2_does_not_require_modules_1_10: true
+
+exam:
+  written:
+    duration_minutes: 190
+    sections:
+      listening: {tasks: 9}
+      reading: {tasks: 9}
+      grammar_vocabulary: {tasks: 18}
+      writing:
+        task_37: {max_score: 6, words_target: [90, 140], words_allowed: [90, 154]}
+        task_38: {max_score: 14, words_target: [200, 250], words_allowed: [180, 275]}
+  oral:
+    duration_minutes: 17
+    tasks:
+      1: {type: read_aloud, text_up_to_words: 170}
+      2: {type: four_questions}
+      3: {type: interview, answers: 5}
+      4: {type: picture_monologue, max_score: 10, phrases_target: [12, 15], zero_if_phrases_lte: 7}
+
+checking:
+  communicative_task_and_organisation: full_from_first_productive_module
+  language: cumulative_only_taught_topics
+  tutor_products_every_module: [37, 38, 4]
+
+module_template:
+  receptive: [vocabulary, grammar, word_formation, reading_strategy, listening_strategy, phonetics]
+  productive: [zoom, tutor_37, tutor_38, tutor_4, auto_test]
+
+not_tested:
+  vocabulary: [2.3.6, 2.3.7, 2.3.8, 2.3.9, 2.3.10]
+  word_formation: [2.3.12, 2.3.13]
+  grammar: [2.4.6, 2.4.7, 2.4.34, 2.4.39, 2.4.40, 2.4.41]
+  spelling: [2.2.5]
+
+partial:
+  grammar: [2.4.15, 2.4.19, 2.4.20, 2.4.21, 2.4.22, 2.4.23]
+  spelling: [2.2.3, 2.2.4]
+  writing: [1.4.5]
+
+topics:
+  А: family_relationships
+  Б: appearance_character
+  В: health
+  Г: school
+  Д: professions
+  Е: foreign_language
+  Ж: youth_leisure
+  З: shopping_fashion
+  И: sport
+  К: business_communication
+  Л: tourism
+  М: nature_ecology
+  Н: media
+  О: technology
+  П: modern_civilization
+  Р: home_and_english_speaking_countries
+  С: outstanding_people
+
+intro_module:
+  id: 0
+  shared: true
+  assets:
+    - 04-intro-video/slides.md
+    - 04-intro-video/script.md
+  missing:
+    - sample_scripts_mr_pch
+    - sample_scripts_mr_uch
+    - product_skeletons
+
+modules:
+  - id: 1
+    year: 1
+    title: Семья и контакт
+    topic: А
+    grammar: [2.4.1, 2.4.2, 2.4.8, "2.4.24 Present Simple/Continuous", "2.4.13 questions of these tenses"]
+    vocabulary: [letter_37_cliches, "2.3.5 basic linkers"]
+    phonetics: [word_stress, no_stress_on_function_words]
+    reading: [1.3.1]
+    listening: [1.2.1]
+  - id: 2
+    year: 1
+    title: Школа
+    topic: Г
+    grammar: ["Past Simple/Continuous", 2.4.21, 2.4.9]
+    vocabulary: [school_cliches, "verb prefixes dis-/re-"]
+    phonetics: [long_short_vowels]
+    reading: [1.3.1]
+    listening: [1.2.1]
+  - id: 3
+    year: 1
+    title: Молодёжь и досуг
+    topic: Ж
+    grammar: ["Present Perfect vs Past Simple"]
+    vocabulary: [2.3.2, "noun suffixes -er/-ing/-ment"]
+    phonetics: [th_vs_s_z]
+    reading: [1.3.2]
+    listening: [1.2.2]
+  - id: 4
+    year: 1
+    title: Путешествия
+    topic: Л
+    grammar: [2.4.25]
+    vocabulary: [2.3.4]
+    phonetics: [w_vs_v]
+    reading: [1.3.2]
+    listening: [1.2.2]
+  - id: 5
+    year: 1
+    title: Здоровье
+    topic: В
+    grammar: [2.4.28, 2.4.29, 2.4.30, 2.4.31, 2.4.32, 2.4.37]
+    vocabulary: [2.3.11.5]
+    phonetics: [vowel_review, start_ɔː_ɜː]
+    reading: [1.3.1]
+    listening: [1.2.1]
+  - id: 6
+    year: 1
+    title: Покупки и мода
+    topic: З
+    grammar: [2.4.35, 2.4.36]
+    vocabulary: ["verb prefixes under-/over-"]
+    phonetics: [ɔː_vs_ɜː]
+    reading: [1.3.2]
+    listening: [1.2.2]
+  - id: 7
+    year: 1
+    title: Спорт
+    topic: И
+    grammar: [2.4.33, 2.4.16, 2.3.3]
+    vocabulary: ["adj prefixes un-/in-", "adj suffixes -ful/-less/-ive"]
+    phonetics: [aspiration_ptk]
+    reading: [1.3.3]
+    listening: [1.2.3]
+  - id: 8
+    year: 1
+    title: Профессии
+    topic: Д
+    grammar: [2.4.26]
+    vocabulary: ["phrasal verbs study/work", "suffixes -ist/-tion"]
+    phonetics: [weak_forms]
+    reading: [1.3.2]
+    listening: [1.2.2]
+  - id: 9
+    year: 1
+    title: СМИ
+    topic: Н
+    grammar: ["Present/Past Simple Passive", 2.4.38]
+    vocabulary: ["noun prefixes un-/in-", media]
+    phonetics: [linking_r]
+    reading: [1.3.3]
+    listening: [1.2.3]
+  - id: 10
+    year: 1
+    title: Сбор года 1
+    topic: mixed_А_И
+    grammar: [2.4.12, 2.3.11.4]
+    vocabulary: ["2.3.5 extended linkers"]
+    phonetics: [pauses_sense_groups, weak_forms]
+    reading: [1.3.1, 1.3.2, 1.3.3]
+    listening: [1.2.1, 1.2.2, 1.2.3]
+  - id: 11
+    year: 2
+    title: Технологии
+    topic: О
+    grammar: ["Present Perfect Continuous", "Past Perfect", "Future Continuous", "Future-in-the-Past", "Present Perfect Passive"]
+    vocabulary: [2.3.2, internet_safety]
+    phonetics: [rhythm_pauses]
+    reading: [1.3.3]
+    listening: [1.2.3]
+  - id: 12
+    year: 2
+    title: Язык и будущее
+    topic: Е
+    grammar: [2.4.14, 2.4.15]
+    vocabulary: ["phrasal verbs language/study"]
+    spelling: [2.2.3]
+    phonetics: [sentence_stress]
+    reading: [1.3.2]
+    listening: [1.2.2]
+  - id: 13
+    year: 2
+    title: Природа и экология
+    topic: М
+    grammar: [2.4.10, 2.4.11]
+    vocabulary: ["adj prefixes inter-/non-/pre-/post-"]
+    phonetics: [falling_rising_tone]
+    reading: [1.3.3]
+    listening: [1.2.3]
+  - id: 14
+    year: 2
+    title: Проблемы цивилизации
+    topic: П
+    grammar: [2.4.27, 2.4.18, 2.4.19]
+    vocabulary: [2.3.1]
+    phonetics: [emphatic_stress]
+    reading: [1.3.3]
+    listening: [1.2.3]
+  - id: 15
+    year: 2
+    title: Россия и мир
+    topic: Р
+    grammar: [2.4.3, 2.4.4, 2.4.5, 2.4.20, 2.4.22, 2.4.23]
+    vocabulary: [country_studies, "suffixes -ese/-ian/-al"]
+    phonetics: [descending_scale]
+    reading: [1.3.1]
+    listening: [1.2.1]
+  - id: 16
+    year: 2
+    title: Выдающиеся люди
+    topic: С
+    grammar: ["tense_review", "passive_in_biography"]
+    vocabulary: [2.3.4, "affixation as system"]
+    phonetics: [polysyllabic_stress]
+    reading: [1.3.3]
+    listening: [1.2.3]
+  - id: 17
+    year: 2
+    title: Деловое и публичное
+    topic: К
+    grammar: [2.4.17, 2.3.5]
+    vocabulary: [neutral_style_essay_38]
+    notes: "Не делать целью деловую лексику 2.3.10"
+    phonetics: [listing_and_complex_tone]
+    reading: [1.3.4]
+    listening: [1.2.2]
+  - id: 18
+    year: 2
+    title: Человек и характер
+    topic: Б
+    grammar: ["article_pronoun_review"]
+    vocabulary: [appearance_character_for_monologue]
+    phonetics: [task_1_read_aloud]
+    reading: [1.3.4]
+    listening: [1.2.3]
+  - id: 19
+    year: 2
+    title: Экзаменационная сборка
+    topic: mixed
+    grammar: [weak_spots_19_36]
+    vocabulary: [exam_traps]
+    phonetics: [oral_tasks_1_2_3]
+    reading: [1.3.1, 1.3.2, 1.3.3, 1.3.4]
+    listening: [1.2.1, 1.2.2, 1.2.3]
+  - id: 20
+    year: 2
+    title: Предэкзамен
+    topic: mixed
+    grammar: [individual_gaps]
+    vocabulary: [coverage_check_1650]
+    phonetics: [full_oral]
+    reading: [full_written_kim]
+    listening: [full_written_kim]
