@@ -82,6 +82,7 @@ strands:
 modules:
   keep_unit_order: true
   mapping: 03-curriculum/solutions-mapping.md
+  detailed: 03-curriculum/curriculum-detailed.md
   items:
     - {id: 1, unit: Introduction, title: Holidays, russia: holiday_geography, phonetics: A1_reading_rules}
     - {id: 2, unit: "1 Generations", title: Generations, russia: family_culture, phonetics: A2_i_iː}

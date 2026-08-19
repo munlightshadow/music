@@ -10,7 +10,7 @@
 | [00-architecture](00-architecture/course-map.md) | Два года, 20 модулей, вводный модуль, диагностика, маршрут ученика |
 | [01-exam](01-exam/exam-structure.md) | Формат ЕГЭ, баллы, критерии 37 / 38 / устная часть |
 | [02-content-spec](02-content-spec/overview.md) | Кодификатор: лексика, грамматика, фонетика, темы, что проверяется |
-| [03-curriculum](03-curriculum/module-index.md) | Сетка 0–20; [Solutions](03-curriculum/solutions-mapping.md); [Россия](03-curriculum/russia-strand.md); [фонетика](03-curriculum/phonetics-strand.md) |
+| [03-curriculum](03-curriculum/module-index.md) | Сетка 0–20; [расширенная таблица](03-curriculum/curriculum-detailed.md); [Solutions](03-curriculum/solutions-mapping.md); [Россия](03-curriculum/russia-strand.md); [фонетика](03-curriculum/phonetics-strand.md) |
 | [04-intro-video](04-intro-video/slides.md) | Слайды и речь эксперта для вводного видео |
 | [05-tutor-ops](05-tutor-ops/feedback-principles.md) | Принцип фидбека и бланки проверки 37 / 38 / задания 4 |
 | [06-sources](06-sources/) | Очищенные исходные документы |
@@ -62,7 +62,7 @@ flowchart TD
 | Шаблоны тьютора | Есть |
 | Вводное видео (слайды + речь) | Есть, без примеров работ. Речь общая для года 1 и года 2 |
 | Полный перечень элементов кодификатора | Есть. 38 = эссе в официальном стиле по таблице или диаграмме, CV нет |
-| Распределение элементов по модулям 1–20 | Solutions + сквозные слои Россия и фонетика |
+| Распределение элементов по модулям 1–20 | Есть расширенная таблица: [curriculum-detailed.md](03-curriculum/curriculum-detailed.md) |
 | Слой «Россия» | Раскладка на 20 лонгридов есть; тексты ещё не написаны |
 | Слой «фонетика» | Шаги 1–20 по порядку кодификатора заданы |
 | Диагностический тест и пороги | Нет. Матрица сила × класс: две клетки открыты |

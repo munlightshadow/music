@@ -18,7 +18,7 @@ CHROME = os.environ.get("CHROME", "/usr/bin/google-chrome")
 CHROME_PROFILE = Path("/tmp/ege-chrome-pdf-profile")
 
 LANDSCAPE = {
-    "03-curriculum/module-index.md",
+    "03-curriculum/curriculum-detailed.md",
     "03-curriculum/russia-strand.md",
     "03-curriculum/phonetics-strand.md",
     "03-curriculum/solutions-mapping.md",
