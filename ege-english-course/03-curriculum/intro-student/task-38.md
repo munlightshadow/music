@@ -69,10 +69,26 @@
 
 ---
 
+## Сначала задание, потом работа
+
+38.1 Imagine that you are doing a project on why some Zetlanders refuse to attend music schools. You have found some data on the subject – the results of a survey (see the table below).
+
+The survey question: Why do you refuse to attend a music school?
+
+| Reasons | Number of respondents (%) |
+| --- | --- |
+| No fast result | 29 |
+| Time-consuming | 23 |
+| Not interested in music | 19 |
+| Far from home | 15 |
+| No money for a quality instrument | 14 |
+
+Write 200–250 words. Plan: opening statement; 2–3 facts; 1–2 comparisons + comments; a problem with learning to play a musical instrument + solution; opinion on whether one should be able to play a musical instrument.
+
+---
+
 ## Удачный пример (музыкальные школы, работа № 1025)
 
-Проект: *why some Zetlanders refuse to attend music schools*.  
-Таблица: нет быстрого результата 29%; занимает много времени 23%; нет интереса к музыке 19%; далеко от дома 15%; нет денег на инструмент 14%.  
 Эксперты: **12 из 14** (РКЗ 3, организация 2, лексика 2, грамматика 3, орфография 2). 224 слова.
 
 Nowadays people do not value music. As part of my project on why some Zetlanders refuse to attend music schools, I have found a table containing some relevant results of the opinion polls that I am going to comment on.

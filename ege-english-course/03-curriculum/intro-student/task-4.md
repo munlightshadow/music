@@ -63,9 +63,23 @@
 
 ---
 
+## Сначала задание, потом работа
+
+Task 4. Imagine that you and your friend are doing a school project “Summer holidays”. You have found some photos to illustrate it but for technical reasons you cannot send them now. Leave a voice message to your friend. In 2.5 minutes be ready to:
+
+- explain the choice of the illustrations by briefly describing them and noting the differences;
+- mention the advantages (1–2) of the two types of summer holidays;
+- mention the disadvantages (1–2) of the two types of summer holidays;
+- express your opinion — which of these ways you preferred as a child and why.
+
+You will speak for not more than 3 minutes (12–15 sentences). You have to talk continuously.
+
+Типы на фото: каникулы в деревне / на пляже.
+
+---
+
 ## Удачный пример (лето, ответ № 0487)
 
-Тема проекта: *Summer holidays*. Типы: каникулы в деревне / на пляже.  
 Эксперты: **9 из 10** (содержание 4, организация 3, язык 2). Язык не идеальный — так и бывает на 9.
 
 Hi, Ann. How are you doing? I have found some photos for our project “Summer holidays”. I would like to share some of my ideas with you, let me know what do you think. In the first picture you can see a mother with her daughter sitting on the ground. They are wearing hats. They are probably in the garden planting. They look happy. The second picture shows us a father with his son chilling on the beach. They are building a sandcastle. They look relaxed. I think both pictures are a good choice for our project because they show two different types of summer holidays – in the countryside and on the beach.

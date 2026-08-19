@@ -10,7 +10,12 @@
 
 Исходники Markdown остаются главными. PDF — для чтения и печати.
 
-Пересобрать:
+Презентация вводного модуля для ученика (не из Markdown, отдельный генератор):
+
+- [03-curriculum/intro-student/вводный-модуль.pdf](03-curriculum/intro-student/вводный-модуль.pdf)
+- пересобрать: `python3 ege-english-course/scripts/intro_student_presentation.py`
+
+Пересобрать остальные снимки:
 
 ```bash
 pip install markdown

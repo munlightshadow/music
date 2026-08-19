@@ -83,9 +83,23 @@ Best wishes,
 
 ---
 
+## Сначала задание, потом работа
+
+37. You have received an email message from your English-speaking pen-friend Olive:
+
+From: Olive@mail.uk  
+To: Russian_friend@ege.ru  
+Subject: St. Petersburg
+
+…At college we are doing projects on the historic cities of the world. If I choose St. Petersburg in Russia, what places of interest should I write about? Is St. Petersburg popular among foreign and local tourists, and why? What season is the best to visit St. Petersburg?  
+We’ve just returned from the trip to the seaside…
+
+Write an email to Olive. In your message: answer her questions; ask 3 questions about the trip. Write 100–140 words.
+
+---
+
 ## Удачный пример (Санкт-Петербург, работа № 8311)
 
-Письмо-стимул от Olive: проект про исторические города; три вопроса про Петербург; новость — поездка на море.  
 Эксперты: **6 из 6** (содержание 2, организация 2, язык 2). 105 слов. Язык не идеальный — так и бывает на 6.
 
 Dear Olive,
