@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_PDF = ROOT / "pdf/03-curriculum/intro-student/вводный-модуль.pdf"
+IMG_DIR = ROOT / "03-curriculum/intro-student/img"
 TMP = Path("/tmp/ege-intro-pres")
 CHROME = os.environ.get("CHROME", "/usr/bin/google-chrome")
 CHROME_PROFILE = Path("/tmp/ege-chrome-pdf-profile")
@@ -112,6 +114,17 @@ th { background: #e7f3f3; color: #0e5f5f; }
 .tag.good { background: #1b7f4e; }
 .tag.bad { background: #b42318; }
 .muted { color: #5c6570; font-size: 13pt; }
+.shots { display: flex; gap: 14px; justify-content: center; align-items: flex-start; }
+.shots img.shot {
+  display: block;
+  max-height: 5.45in;
+  max-width: 12.1in;
+  object-fit: contain;
+  border: 1px solid #c5d0d0;
+  background: #fff;
+}
+.shots.n2 img.shot { max-width: 6.05in; max-height: 5.35in; }
+.credit { font-size: 11pt; color: #7a838c; margin: 0 0 8px; }
 """
 
 
@@ -156,6 +169,12 @@ def tbl(headers: list[str], rows: list[list[str]]) -> str:
     return f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
 
 
+def shot(title: str, credit: str, *names: str) -> str:
+    imgs = "".join(f'<img class="shot" src="img/{n}" alt="">' for n in names)
+    cap = f'<p class="credit">{credit}</p>' if credit else ""
+    return f'<h1>{title}</h1><div>{cap}<div class="shots n{len(names)}">{imgs}</div></div>'
+
+
 def slides() -> list[str]:
     s: list[str] = []
     a = s.append
@@ -176,13 +195,13 @@ def slides() -> list[str]:
     a(h("Письменная часть · 190 минут · 62 балла", tbl(
         ["Задания", "Раздел", "Баллы", "Куда"],
         [
-            ["1–9", "Аудирование", "20", "бланк № 1"],
-            ["10–18", "Чтение", "20", "бланк № 1"],
+            ["1–9", "Аудирование", "12", "бланк № 1"],
+            ["10–18", "Чтение", "12", "бланк № 1"],
             ["19–36", "Грамматика и лексика", "18", "бланк № 1"],
             ["37", "Личное письмо другу", "6", "бланк № 2"],
             ["38", "Эссе по таблице или диаграмме", "14", "бланк № 2"],
         ],
-    ) + '<p class="muted" style="margin-top:12px">Рекомендуемое время: аудирование 30 мин (идёт с записью), чтение 30, грамматика 40, письмо 90.</p>'))
+    ) + '<p class="muted" style="margin-top:12px">Рекомендуемое время: аудирование 30 мин (идёт с записью), чтение 30, грамматика 40, письмо 90. Задание 1 = 2 балла, 2 = 3, 3–9 по 1. Задание 10 = 3, 11 = 2, 12–18 по 1.</p>'))
     a(h("Устная часть · ~17 минут · 20 баллов · отдельный день", tbl(
         ["Задание", "Что делать", "Баллы", "Черновик"],
         [
@@ -200,6 +219,11 @@ def slides() -> list[str]:
         "Письмо 37 и эссе 38 сюда <b>не писать</b>.",
         "Сначала работаете в КИМ, на перенос оставьте время.",
     ])))
+    a(shot(
+        "Как заполнять бланк № 1",
+        "Демоверсия КИМ ЕГЭ 2025, инструкция к письменной части.",
+        "demo-blank-instruction.png",
+    ))
     a(h("Бланк ответов № 2", ul([
         "Сюда пишете <b>только 37 и 38</b>. Укажите номер задания.",
         "Для 38 укажите <b>38.1 или 38.2</b> — выбран только один вариант.",
@@ -217,20 +241,47 @@ def slides() -> list[str]:
         "<b>РКЗ и организация</b> — полностью с первой сдачи. <b>Язык</b> — только по уже пройденным темам.",
     ])))
 
-    a(section("Часть 1", "Письменная часть<br>задания 1–36", "Кратко: формат, чтобы не удивиться в бланке № 1."))
-    a(h("Аудирование · задания 1–9 · 20 баллов", ul([
-        "<b>1</b> — соответствие: кто что говорит (основное содержание).",
-        "<b>2</b> — верно / неверно / в тексте не сказано.",
-        "<b>3–9</b> — выбор ответа по интервью (полное понимание).",
+    a(section("Часть 1", "Письменная часть<br>задания 1–36", "Кратко: формат и сами задания из демоверсии 2025."))
+    a(h("Аудирование · задания 1–9 · 12 баллов", ul([
+        "<b>1</b> — соответствие: кто что говорит (основное содержание). Максимум 2 балла.",
+        "<b>2</b> — верно / неверно / в тексте не сказано. Максимум 3 балла.",
+        "<b>3–9</b> — выбор ответа по интервью (полное понимание). По 1 баллу.",
         "Запись идёт один раз по инструкции КИМ. Ответы — в бланк № 1.",
         "На курсе стратегии аудирования — в рецептивной фазе каждого модуля.",
     ])))
-    a(h("Чтение · задания 10–18 · 20 баллов", ul([
-        "<b>10</b> — заголовки к абзацам (основное содержание).",
-        "<b>11</b> — вставить пропущенные фрагменты (связи в тексте).",
-        "<b>12–18</b> — выбор ответа (полное понимание).",
-        "Объём текстов на экзамене — до 900 слов. Есть и несплошные тексты (таблицы) — это готовит к заданию 38.",
+    a(shot(
+        "Аудирование · задания 1–2",
+        "Демоверсия КИМ ЕГЭ 2025. Таблица здесь — только поле для ответов, не данные для анализа.",
+        "demo-listening-1-2.png",
+    ))
+    a(shot(
+        "Аудирование · задания 3–9",
+        "Демоверсия КИМ ЕГЭ 2025: интервью, выбор 1 / 2 / 3.",
+        "demo-listening-3-9.png",
+    ))
+    a(h("Чтение · задания 10–18 · 12 баллов", ul([
+        "<b>10</b> — заголовки к абзацам (основное содержание). Максимум 3 балла.",
+        "<b>11</b> — вставить пропущенные фрагменты (связи в тексте). Максимум 2 балла.",
+        "<b>12–18</b> — выбор ответа по связному тексту (полное понимание). По 1 баллу.",
+        "Тексты — сплошные: статьи, заметки. <b>Таблиц и диаграмм в чтении нет.</b>",
+        "Таблица/круговая диаграмма — это задание <b>38</b> (письмо), не раздел «Чтение».",
+        "Объём текстов на экзамене — до 900 слов.",
     ])))
+    a(shot(
+        "Чтение · задание 10",
+        "Демоверсия КИМ ЕГЭ 2025: короткие тексты + заголовки. «Таблица» внизу — только сетка ответов.",
+        "demo-reading-10.png",
+    ))
+    a(shot(
+        "Чтение · задание 11",
+        "Демоверсия КИМ ЕГЭ 2025: один текст с пропусками A–F.",
+        "demo-reading-11.png",
+    ))
+    a(shot(
+        "Чтение · задания 12–18",
+        "Демоверсия КИМ ЕГЭ 2025: длинный сплошной текст, выбор ответа. Несплошных текстов нет.",
+        "demo-reading-12.png",
+    ))
     a(h("Грамматика и лексика · задания 19–36 · 18 баллов", ul([
         "<b>19–24</b> — грамматика: поставить слово в нужную форму (6 баллов).",
         "<b>25–29</b> — словообразование (5 баллов).",
@@ -238,29 +289,25 @@ def slides() -> list[str]:
         "В бланке № 1: слова заглавными буквами, без лишних символов.",
         "На курсе грамматика копится по модулям. Тьютор в 37/38/4 комментирует только уже пройденное.",
     ])))
+    a(shot(
+        "Грамматика · задания 19–24",
+        "Демоверсия КИМ ЕГЭ 2025. Может быть один текст или два коротких (помечено «ИЛИ»).",
+        "demo-grammar-19-24.png",
+    ))
+    a(shot(
+        "Словообразование · задания 25–29",
+        "Демоверсия КИМ ЕГЭ 2025: образовать родственное слово от опорного.",
+        "demo-wordformation-25-29.png",
+    ))
 
     a(section("Часть 2", "Задание 37<br>электронное письмо", "Подробно. Сначала задание — потом работы."))
     a(big("6 баллов", "максимум за письмо другу<br>РКЗ 2 · организация 2 · язык 2"))
-    a(h("Сначала само задание", """
-<p class="muted">Так выглядит КИМ. Дальше разберём, что с ним делать.</p>
-<pre class="kim">37. You have received an email message from your English-speaking pen-friend Olive:
-
-From: Olive@mail.uk
-To: Russian_friend@ege.ru
-Subject: St. Petersburg
-
-…At college we are doing projects on the historic cities of the world.
-If I choose St. Petersburg in Russia, what places of interest should I write about?
-Is St. Petersburg popular among foreign and local tourists, and why?
-What season is the best to visit St. Petersburg?
-We’ve just returned from the trip to the seaside…
-
-Write an email to Olive.
-In your message:
-  – answer her questions;
-  – ask 3 questions about the trip.
-Write 100–140 words. Remember the rules of email writing.</pre>
-"""))
+    a(h("Сначала само задание", '<p class="muted">Так выглядит КИМ. Дальше разберём, что с ним делать.</p>'))
+    a(shot(
+        "Задание 37 · демоверсия 2025",
+        "ФИПИ, демоверсия КИМ / методические материалы 2025. Тема — русская литература, три вопроса + новость про подарок.",
+        "demo-writing-37.png",
+    ))
     a(h("Что сделать", ul([
         "Ответить на <b>все три</b> вопроса друга — полно и точно.",
         "Задать <b>три своих вопроса</b> именно про его новость (здесь — поездка на море).",
@@ -302,21 +349,11 @@ Best wishes,
 <li>Абзацы должны быть видны. Один простой абзац из одной короткой фразы — слабо.</li>
 </ul>
 """, small=True))
-    a(h("Удачный ответ · 6 из 6", """
-<span class="tag good">работа 8311 · Olive · 105 слов · К1 2 · К2 2 · К3 2</span>
-<div class="example ok">Dear Olive,
-
-Thanks for your email. I hope you're doing fine.
-
-In your email you ask me some questions about St. Petersburg. I think you should write about Hermitage and Petergof. In my opinion St Petersburg is popular among foreign and local tourists because it's the most beautiful historic city of the world. I think summer is the best season to visit St. Petersburg.
-
-By the way, I want to ask you some questions about the trip. How long was your trip? What interesting things did you see? Did you go to the trip by yourself?
-
-I guess that's all for now. Write back soon.
-Best wishes,
-Liza</div>
-<p class="muted">Язык не идеальный — так и бывает на 6. Petergof друг поймёт. Запятой после In my opinion нет — одну пунктуацию простили.</p>
-""", small=True))
+    a(shot(
+        "Удачный ответ · 6 из 6",
+        "Работа 8311, скан из мр Пч. Olive / St. Petersburg · 105 слов · К1 2 · К2 2 · К3 2.",
+        "work-8311.png",
+    ))
     a(h("Почему это 6, а не обрубок", ul([
         "Есть Dear Olive, Write back soon, Best wishes и только имя.",
         "Три ответа по существу, в том числе про Россию — так, что англичанин поймёт.",
@@ -324,22 +361,11 @@ Liza</div>
         "Абзацы и отдельные строки на месте.",
         "На курсе с первой сдачи требуем содержание и организацию как здесь. Язык комментируем по пройденным темам.",
     ])))
-    a(h("Сначала задание · потом ноль", """
-<pre class="kim">From: Mike@mail.uk  Subject: Mobile devices
-…I’ve recently been involved in a school survey on gadgets and devices.
-What device is your favourite, if any? What do you usually use it for?
-Do you consider using mobile phones essential for young people, why or why not?
-I’ve recently returned from a nice summer camp…
-— answer his questions; ask 3 questions about the summer camp.</pre>
-<span class="tag bad">работа 8447 · 0 из 6</span>
-<div class="example bad">Hey, Mike.
-How's it going? … Actually, i'm really glad to hear you again…
-Wanna tell me more about your timespan out there?
-Is it was nice or not? Can you recommend me visit any or better not?
-I’ll be waiting for your emails.
-Best wishes,
-Danil</div>
-""", small=True))
+    a(shot(
+        "Сначала задание · потом ноль",
+        "Работа 8447, скан из мр Пч. Hey Mike · 0 из 6. Обращение Hey и вопросы не по новости.",
+        "work-8447.png",
+    ))
     a(h("Почему сразу ноль", ul([
         "<code>Hey</code> не принимают как обращение задания 37.",
         "<i>to hear you</i> вместо <i>to hear from you</i> — формула вежливости не засчитана.",
@@ -374,28 +400,17 @@ Danil</div>
         "Высокий язык без анализа данных высокие баллы не даст. Содержание важнее.",
         "Если по РКЗ 0 — вся работа 0.",
     ])))
-    a(h("Сначала само задание", """
-<pre class="kim">38.1 Imagine that you are doing a project on why some Zetlanders refuse
-to attend music schools. You have found some data on the subject – the
-results of a survey (see the table below). Comment on the survey data
-and give your opinion on the subject of the project.
-
-The survey question: Why do you refuse to attend a music school?
-  No fast result                         29%
-  Time-consuming                         23%
-  Not interested in music                19%
-  Far from home                          15%
-  No money for a quality instrument      14%
-
-Write 200–250 words. Use the following plan:
-  – make an opening statement on the subject of the project;
-  – select and report 2–3 facts;
-  – make 1–2 comparisons where relevant and give your comments;
-  – outline a problem that can arise with learning to play a musical
-    instrument and suggest a way of solving it;
-  – conclude by giving and explaining your opinion on whether one
-    should be able to play a musical instrument.</pre>
-""", small=True))
+    a(h("Сначала само задание", '<p class="muted">В КИМ два варианта. Выбираете только один. Таблица или круговая диаграмма — здесь, в задании 38, не в чтении.</p>'))
+    a(shot(
+        "Задание 38.1 · таблица · демоверсия 2025",
+        "ФИПИ, демоверсия / мр Пч 2025. Почему жители Zetland не ходят в театр.",
+        "demo-writing-38-1.png",
+    ))
+    a(shot(
+        "Задание 38.2 · круговая диаграмма · демоверсия 2025",
+        "Тот же КИМ: альтернатива — pie chart про изучение иностранных языков.",
+        "demo-writing-38-2.png",
+    ))
     a(h("Пять абзацев = шесть аспектов РКЗ", tbl(
         ["Абзац", "Что написать", "Нельзя"],
         [
@@ -429,18 +444,11 @@ A possible way to solve it is…
 In conclusion, I believe that … because …</pre>
 <p>Не пишите <i>I organised it in the table below</i> — таблицы «ниже» в бланке нет, и вы её не составляли.</p>
 """, small=True))
-    a(h("Удачный ответ · 12 из 14", """
-<span class="tag good">работа 1025 · 224 слова · РКЗ 3 · орг. 2 · лекс. 2 · гр. 3 · орф. 2</span>
-<div class="example ok">Nowadays people do not value music. As part of my project on why some Zetlanders refuse to attend music schools, I have found a table containing some relevant results of the opinion polls that I am going to comment on.
-
-According to the data, the majority of the respondents choose "No fast result" … The second most sizeable group vote for "Time-consuming" (23%). … the least favoured option is "No money for a quality instrument" (14%)…
-
-Looking more closely at the table, … "Not interested in music" … more widespread … than "Far from home" … 4 percentage points…
-
-… one of the problems … is that one can not find a suitable teacher. … A person should attend trial lessons…
-
-In conclusion, I believe that being able to play a musical instrument is important. That is because a person can always find comfort in music.</div>
-""", small=True))
+    a(shot(
+        "Удачный ответ · 12 из 14",
+        "Работа 1025, скан из мр Пч. Музыкальные школы · 224 слова · РКЗ 3 · орг. 2 · лекс. 2 · гр. 3 · орф. 2.",
+        "work-1025.png",
+    ))
     a(h("Почему 12, а не 14", ul([
         "Есть проект, тема и opinion polls. Три факта с цифрами. Проблема из плана. Явное I believe.",
         "Сняли организацию и лексику: сравнили 19% и 15% (разница 4 пункта — слабое сравнение), комментарий про «другие хобби» из таблицы не следует.",
@@ -448,21 +456,11 @@ In conclusion, I believe that being able to play a musical instrument is importa
         "На курсе лучше сразу сравнивать несхожие цифры, например 29% и 14%.",
         "Содержание и организацию с первой сдачи требуем как здесь. Язык — по пройденным темам.",
     ])))
-    a(h("Сначала задание · потом ноль", """
-<pre class="kim">38.1 … project on the preparations for the New Year that Zetlanders
-consider most important … survey …
-  Tidy the house 36% · Decorate a New Year tree 34% · Cook traditional
-  dishes 20% · Buy presents 7% · Buy a new outfit 3%
-… outline a problem that can arise with organizing a New Year party …
-… opinion on the importance of preparing for New Year celebrations
-well in advance.</pre>
-<span class="tag bad">работа 8781 · 218 слов · 0 из 14</span>
-<div class="example bad">… I have just found some data … and organised it in the table below.
-… only third percent of respondents …
-… 20 per cent … is only slightly lower than … decorate a New Year tree.
-… only seven per cent of respondent buy presents …
-In conclusion, I belive that people will celebrate New Year funny …</div>
-""", small=True))
+    a(shot(
+        "Сначала задание · потом ноль",
+        "Работа 8781, скан из мр Пч. Новый год · 218 слов · 0 из 14. «Сам организовал таблицу ниже», цифры словами, вывод не по плану.",
+        "work-8781.png",
+    ))
     a(h("Почему ноль, хотя абзацев пять", ul([
         "Нет survey: «сам организовал таблицу ниже».",
         "Факты без нормальных цифр (<i>only third percent</i>).",
@@ -486,17 +484,12 @@ In conclusion, I belive that people will celebrate New Year funny …</div>
     a(big("20 баллов", "вся устная часть: 1 + 4 + 5 + 10<br>ответ только голосом, ~17 минут вместе с подготовкой"))
     a(h("Задание 1 · чтение вслух · 1 балл", """
 <p>Подготовка 1,5 мин. Читать 1,5 мин. Ставят 1 или 0.</p>
-<pre class="kim">Task 1. You have 1.5 minutes to read the text silently, then be ready
-to read it out aloud. You will not have more than 1.5 minutes to read it.
-
-Lake Baikal in Siberia is the deepest freshwater lake on Earth. It holds
-about one fifth of the world’s unfrozen fresh water. In winter the surface
-is covered with thick ice, and people walk and even drive on it. In summer
-the water is cold but very clear. Scientists study unique fish and plants
-that live only here. For many Russians Baikal is not just a lake but a
-symbol of nature that must be protected.</pre>
-<p class="muted">На экзамене текст другой. Важно: дочитать до конца, не пропускать слова, паузы по смыслу, звуки и ударение.</p>
 """, small=True))
+    a(shot(
+        "Говорение · задание 1 · демоверсия 2025",
+        "ФИПИ, демоверсия устной части: текст про water hole в саванне.",
+        "demo-speaking-1.png",
+    ))
     a(h("Задание 1 · на что смотрят", ul([
         "Интонация, звуки, словесное и фразовое ударение.",
         "Уложиться в 1,5 минуты и дочитать текст.",
@@ -504,21 +497,11 @@ symbol of nature that must be protected.</pre>
         "Риск нуля: речь почти не прочитать; 3+ смысловые замены звуков; пропуск 3+ слов; пауза, ломающая смысл.",
         "На курсе фонетика идёт по шагам 1–20. Сборка чтения вслух — к модулям 18–20.",
     ])))
-    a(h("Задание 2 · четыре вопроса · 4 балла", """
-<pre class="kim">Task 2. Study the advertisement.
-You are considering going to the mountains and now you’d like to get
-more information. In 1.5 minutes you are to ask four direct questions
-to find out about the following:
-
-        Join our journey to the mountains!
-
-1) duration of the tour
-2) price for one
-3) student discounts
-4) special equipment needed
-
-You have 20 seconds to ask each question.</pre>
-""", small=True))
+    a(shot(
+        "Говорение · задание 2 · демоверсия 2025",
+        "ФИПИ, демоверсия: реклама хоккейного клуба и 4 опорных пункта.",
+        "demo-speaking-2.png",
+    ))
     a(h("Задание 2 · как спрашивать", ul([
         "По <b>1 баллу</b> за вопрос. Каждый вопрос оценивают отдельно.",
         "Вступление и прощание <b>не нужны</b>.",
@@ -527,19 +510,12 @@ You have 20 seconds to ask each question.</pre>
         "Последний вариант, даже если исправились на худший, и есть тот, что засчитают.",
         "Норма: <i>How long does the tour last?</i> · <i>How much does it cost for one person?</i> · <i>Are there any student discounts?</i> · <i>What special equipment is needed?</i>",
     ])))
-    a(h("Задание 3 · интервью · 5 баллов", """
-<p>Вопросы на экране вы <b>не видите заранее</b>. Слушайте. 40 секунд на ответ, 2–3 фразы. По 1 баллу за ответ.</p>
-<pre class="kim">Interviewer: Hello everybody! It’s Teenagers Round the World Channel.
-Our guest today is a teenager from Russia and we are going to discuss
-teenagers’ attitude to local places of interest.
-
-– What are some of the places of interest in your region? Why should
-  a tourist see them?
-– Is it important to preserve historical places? Why or why not?
-– What is your favourite place in your home town? Why do you like it?
-– What sort of places will be interesting for people in the future? Why?
-– How can we make teenagers be more interested in local culture?</pre>
-""", small=True))
+    a(h("Задание 3 · интервью · 5 баллов", "<p>Вопросы на экране вы <b>не видите заранее</b>. Слушайте. 40 секунд на ответ, 2–3 фразы. По 1 баллу за ответ.</p>"))
+    a(shot(
+        "Говорение · задание 3 · демоверсия 2025",
+        "ФИПИ, демоверсия: интервью Teenagers Round the World про одежду. На экзамене звучит в наушниках.",
+        "demo-speaking-3.png",
+    ))
     a(h("Задание 3 · как отвечать", ul([
         "Каждый вопрос звучит один раз. Можно секунду подумать — нельзя молчать до нуля.",
         "Полный ответ: все детали вопроса (what <b>and</b> why).",
@@ -551,23 +527,12 @@ teenagers’ attitude to local places of interest.
 
     a(section("Часть 5", "Задание 4<br>голосовое другу", "Основной устный продукт курса. С первой сдачи тьютору."))
     a(big("10 баллов", "максимум за монолог<br>РКЗ 4 · организация 3 · язык 3"))
-    a(h("Сначала само задание", """
-<pre class="kim">Task 4. Imagine that you and your friend are doing a school project
-“Summer holidays”. You have found some photos to illustrate it but for
-technical reasons you cannot send them now. Leave a voice message to
-your friend explaining your choice of the photos and sharing some ideas
-about the project. In 2.5 minutes be ready to:
-
-  ● explain the choice of the illustrations for the project by briefly
-    describing them and noting the differences;
-  ● mention the advantages (1–2) of the two types of summer holidays;
-  ● mention the disadvantages (1–2) of the two types of summer holidays;
-  ● express your opinion on the subject of the project – which of these
-    ways of spending summer holidays you preferred as a child and why.
-
-You will speak for not more than 3 minutes (12–15 sentences).
-You have to talk continuously.</pre>
-""", small=True))
+    a(h("Сначала само задание", '<p class="muted">Так выглядит КИМ. Фото другу сейчас не отправляете — только голос.</p>'))
+    a(shot(
+        "Говорение · задание 4 · демоверсия 2025",
+        "ФИПИ, демоверсия: проект Volunteering, два фото. 12–15 фраз, не больше 3 минут.",
+        "demo-speaking-4.png",
+    ))
     a(h("Что это за ситуация", ul([
         "Друг <b>не видит</b> фото. Не говорите «я уже отправил картинки».",
         "Обращайтесь к другу по имени, you.",
@@ -599,23 +564,16 @@ As for me, when I was a child I preferred … because …
 
 That’s all I wanted to say. Let me know what you think. Bye!</pre>
 """, small=True))
-    a(h("Удачный ответ · 9 из 10", """
-<span class="tag good">ответ 0487 · Summer holidays · РКЗ 4 · орг. 3 · язык 2</span>
-<div class="example ok">Hi, Ann. How are you doing? I have found some photos for our project “Summer holidays”. … In the first picture … a mother with her daughter … in the garden planting. … The second picture … father with his son … on the beach. … two different types of summer holidays – in the countryside and on the beach.
-
-The main advantage of … countryside is that you can help your parents with gardening … but … energy- and time-consuming … The main benefit of … the beach is that it’s very relaxing … disadvantage … sunstroke …
-
-Talking about me, when I was a child, I preferred spending holidays on a beach because I was keen on swimming … That’s all what I wanted to say. Let me know what you think. Goodbye.</div>
-<p class="muted">Язык 2, не 3: what do you think, a summer holidays, injure. Связки перед плюсами можно было явнее. Содержание закрыто.</p>
-""", small=True))
-    a(h("Неудачный ответ · 0 из 10", """
-<span class="tag bad">ответ 9213 · Family pastime</span>
-<div class="example bad">Hello, my dear friend! I’ve found two photos for hour project Family Pastime. And I’d like discuss with you. I chose these photos because they best illustrate family pastime. In the first picture we can see a family who spend their time on smart phone. Whiles in second picture we can see family who walking outside.
-
-[дальше — длинные паузы, обрывки, достоинства не названы, мнение не разобрать]</div>
-<p>Приветствие и слово project сами по себе задание не спасают. Нет различия, связанного с проектом, нет плюсов и минусов двух типов, нет понятного мнения. Содержание &lt; 50% → всё задание 0.</p>
-<p class="muted">Ещё хуже обрубок без друга и проекта: “I’d like to compare and contrast two pictures… I like shopping online.”</p>
-""", small=True))
+    a(shot(
+        "Удачный ответ · 9 из 10",
+        "Ответ 0487, скан разбора из мр УЧ. Summer holidays · РКЗ 4 · орг. 3 · язык 2. Устная работа — аудио; здесь страница экспертного разбора со словами ответа.",
+        "work-0487.png",
+    ))
+    a(shot(
+        "Неудачный ответ · 0 из 10",
+        "Ответ 9213, скан из мр УЧ. Family pastime. Нет различия про проект, нет плюсов/минусов двух типов, мнение не разобрать → содержание &lt; 50% → всё задание 0.",
+        "work-9213.png",
+    ))
     a(h("Чек-лист 4 перед записью", ul([
         "12–15 фраз, не меньше 7.",
         "Hi + имя.",
@@ -667,6 +625,10 @@ def main() -> int:
 </html>
 """
     TMP.mkdir(parents=True, exist_ok=True)
+    img_tmp = TMP / "img"
+    if img_tmp.exists():
+        shutil.rmtree(img_tmp)
+    shutil.copytree(IMG_DIR, img_tmp)
     html_path = TMP / "intro.html"
     html_path.write_text(doc, encoding="utf-8")
     OUT_PDF.parent.mkdir(parents=True, exist_ok=True)
@@ -679,12 +641,13 @@ def main() -> int:
         "--disable-dev-shm-usage",
         "--no-first-run",
         "--no-default-browser-check",
+        "--allow-file-access-from-files",
         "--no-pdf-header-footer",
         f"--user-data-dir={CHROME_PROFILE}",
         f"--print-to-pdf={OUT_PDF}",
         html_path.resolve().as_uri(),
     ]
-    result = subprocess.run(cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=90)
+    result = subprocess.run(cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=180)
     if result.returncode != 0 or not OUT_PDF.exists() or OUT_PDF.stat().st_size < 20000:
         raise SystemExit(
             f"Chrome failed ({result.returncode})\n{result.stderr[-4000:]}\nsize={OUT_PDF.stat().st_size if OUT_PDF.exists() else 0}"

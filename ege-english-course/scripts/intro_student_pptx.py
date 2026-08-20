@@ -19,7 +19,7 @@ from pptx.util import Emu, Inches, Pt
 from lxml import etree
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from intro_student_presentation import slides  # noqa: E402
+from intro_student_presentation import slides, IMG_DIR  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_STUDENT = ROOT / "03-curriculum" / "intro-student" / "вводный-модуль.pptx"
@@ -326,14 +326,14 @@ def layout_blocks(slide, blocks, x, y, w, bottom, small):
     for k in kinds:
         if k == "table":
             weights.append(2.4)
-        elif k in ("kim", "example"):
-            weights.append(3.2)
+        elif k in ("kim", "example", "shots", "img"):
+            weights.append(3.6)
         elif k == "ul":
             weights.append(2.0)
         elif k == "tag":
             weights.append(0.42)
         elif k == "p":
-            weights.append(0.7)
+            weights.append(0.45)
         else:
             weights.append(0.6)
     total_w = sum(weights) or 1
@@ -347,11 +347,13 @@ def layout_blocks(slide, blocks, x, y, w, bottom, small):
         if k == "tag":
             mins.append(0.34)
         elif k == "p":
-            mins.append(0.42)
+            mins.append(0.32)
         elif k == "ul":
             mins.append(0.9)
         elif k == "table":
             mins.append(1.4)
+        elif k in ("shots", "img"):
+            mins.append(3.2)
         else:
             mins.append(1.1)
     # Redistribute if mins overflow
@@ -359,7 +361,7 @@ def layout_blocks(slide, blocks, x, y, w, bottom, small):
         heights[i] = max(heights[i], mn)
     extra = sum(heights) + gaps - remaining
     if extra > 0:
-        flex = [i for i, k in enumerate(kinds) if k in ("kim", "example", "ul", "table")]
+        flex = [i for i, k in enumerate(kinds) if k in ("kim", "example", "ul", "table", "shots", "img")]
         if flex:
             cut = extra / len(flex)
             for i in flex:
@@ -388,6 +390,10 @@ def _kind(block: HtmlElement) -> str:
         return "example"
     if tag == "span" and "tag" in classes:
         return "tag"
+    if tag == "img":
+        return "img"
+    if tag == "div" and "shots" in classes:
+        return "shots"
     if tag == "p":
         return "p"
     return "other"
@@ -406,6 +412,8 @@ def draw_block(slide, block, kind, x, y, w, h, small):
         draw_tag(slide, block, x, y)
     elif kind == "p":
         draw_p(slide, block, x, y, w, h, small)
+    elif kind in ("img", "shots"):
+        draw_shots(slide, block, x, y, w, h)
     else:
         text = node_text(block)
         if text:
@@ -490,10 +498,43 @@ def draw_tag(slide, block, x, y):
 
 def draw_p(slide, block, x, y, w, h, small):
     classes = (block.get("class") or "").split()
-    color = MUTED if "muted" in classes else DARK
-    size = 12 if small or "muted" in classes else 14
+    color = MUTED if "muted" in classes or "credit" in classes else DARK
+    size = 11 if "credit" in classes else (12 if small or "muted" in classes else 14)
     runs = inline_runs(block)
     add_rich_textbox(slide, x, y, w, h, runs, size, color)
+
+
+def draw_shots(slide, block, x, y, w, h):
+    from PIL import Image as PILImage
+
+    if block.tag == "img":
+        srcs = [block.get("src") or ""]
+    else:
+        srcs = [img.get("src") or "" for img in block.findall(".//img")]
+    paths = []
+    for src in srcs:
+        name = Path(src).name
+        path = IMG_DIR / name
+        if path.exists():
+            paths.append(path)
+    if not paths:
+        return
+    gap = 0.12
+    n = len(paths)
+    cell_w = (w - gap * (n - 1)) / n
+    for i, path in enumerate(paths):
+        with PILImage.open(path) as im:
+            iw, ih = im.size
+        box_w, box_h = cell_w, h
+        img_aspect = iw / ih if ih else 1
+        box_aspect = box_w / box_h if box_h else 1
+        if img_aspect > box_aspect:
+            nw, nh = box_w, box_w / img_aspect
+        else:
+            nw, nh = box_h * img_aspect, box_h
+        ox = x + i * (cell_w + gap) + (cell_w - nw) / 2
+        oy = y + (h - nh) / 2
+        slide.shapes.add_picture(str(path), Inches(ox), Inches(oy), Inches(nw), Inches(nh))
 
 
 def add_multiline(slide, x, y, w, h, text, size, color):
