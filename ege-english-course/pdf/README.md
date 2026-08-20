@@ -12,8 +12,9 @@
 
 Презентация вводного модуля для ученика (не из Markdown, отдельный генератор):
 
+- редактируемый PPTX: [../03-curriculum/intro-student/вводный-модуль.pptx](../03-curriculum/intro-student/вводный-модуль.pptx) (копия рядом с PDF: [03-curriculum/intro-student/вводный-модуль.pptx](03-curriculum/intro-student/вводный-модуль.pptx))
 - [03-curriculum/intro-student/вводный-модуль.pdf](03-curriculum/intro-student/вводный-модуль.pdf)
-- пересобрать: `python3 ege-english-course/scripts/intro_student_presentation.py`
+- пересобрать PDF и PPTX: `python3 ege-english-course/scripts/intro_student_presentation.py` (нужен `python-pptx`)
 
 Пересобрать остальные снимки:
 

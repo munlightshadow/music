@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the student intro-module presentation (widescreen PDF)."""
+"""Build the student intro-module presentation (widescreen PDF and PPTX)."""
 
 from __future__ import annotations
 
@@ -690,6 +690,9 @@ def main() -> int:
             f"Chrome failed ({result.returncode})\n{result.stderr[-4000:]}\nsize={OUT_PDF.stat().st_size if OUT_PDF.exists() else 0}"
         )
     print(f"OK  {OUT_PDF.relative_to(ROOT)}  ({OUT_PDF.stat().st_size} bytes, {total} slides)")
+    from intro_student_pptx import main as write_pptx
+
+    write_pptx()
     return 0
 
 
