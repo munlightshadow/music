@@ -15,7 +15,19 @@ course:
 routing:
   diagnostic_before_intro: true
   intro_module_shared: true
-  inputs: [diagnostic_strength, school_grade]
+  labels_weak_strong: internal_team_only
+  diagnostic_scale: cambridge_cefr
+  refuse:
+    - cefr_below_A2
+    - before_summer_preceding_grade_10
+  bands:
+    weak:
+      cefr: "A2 to low B1"
+      client_route: "modules 1-20"
+    strong:
+      cefr: "solid B1 to B2"
+      client_route: "modules 11-20; 1-10 always open"
+  inputs: [cambridge_cefr, school_grade]
   ideal:
     weak_grade_10: {start: 1, path: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]}
     strong_grade_11:
@@ -25,6 +37,7 @@ routing:
   unresolved:
     - strong_grade_10
     - weak_grade_11
+  options: 00-architecture/placement-options.md
   year_1:
     id: basic
     modules: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
