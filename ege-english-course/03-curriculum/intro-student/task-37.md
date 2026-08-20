@@ -115,7 +115,7 @@ I guess that's all for now. Write back soon.
 Best wishes,  
 Liza
 
-**Почему это сильный ответ**
+**Почему это удачный ответ**
 
 - есть `Dear Olive,`, `Write back soon`, `Best wishes,` и только имя;
 - три ответа по существу, в том числе **про Россию**;

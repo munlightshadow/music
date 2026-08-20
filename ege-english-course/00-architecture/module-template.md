@@ -64,9 +64,9 @@
 Вводный модуль не гоняет тренажёры кодификатора как рабочий. Он даёт навигацию:
 
 - как устроен экзамен;
-- как устроен курс;
+- как устроен курс и кто **преподаватель**, **тьютор**, **куратор**;
 - как проверяют 37, 38 и задание 4;
 - накопительный принцип фидбека;
 - куда возвращаться перед сдачей работ.
 
-Материалы: [slides.md](../04-intro-video/slides.md), [script.md](../04-intro-video/script.md).
+Материалы: [slides.md](../04-intro-video/slides.md), [script.md](../04-intro-video/script.md), презентация и [речь](../03-curriculum/intro-student/presentation-script.md), [памятка родителям](../03-curriculum/intro-student/parent-guide.md).

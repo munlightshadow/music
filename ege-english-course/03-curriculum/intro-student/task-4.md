@@ -88,7 +88,7 @@ The main advantage of having a summer holidays in the countryside is that you ca
 
 Talking about me, when I was a child, I preferred spending holidays on a beach because I was keen on swimming, it was my hobby. That’s all what I wanted to say. Let me know what you think. Goodbye.
 
-**Почему это сильный ответ**
+**Почему это удачный ответ**
 
 - есть обращение к другу и прощание;
 - назван проект *Summer holidays*;

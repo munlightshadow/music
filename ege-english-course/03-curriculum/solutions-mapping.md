@@ -146,7 +146,7 @@ English World — три коротких текста на модуль: [engli
 
 ## Год 2 = Upper-Intermediate: Introduction + 1–9 → модули 11–20
 
-Introduction Upper — повтор времён. Для сильного 11-классника это как раз вход, не «ещё один Present Simple с нуля».
+Introduction Upper — повтор времён. Для продвинутой группы (старт с модуля 11) это как раз вход, не «ещё один Present Simple с нуля».
 
 ### Модуль 11 ← Introduction. Friends / life events
 

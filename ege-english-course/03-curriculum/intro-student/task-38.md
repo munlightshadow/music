@@ -101,7 +101,7 @@ It is worth mentioning that one of the problems that may arise with learning to 
 
 In conclusion, I believe that being able to play a musical instrument is important. That is because a person can always find comfort in music.
 
-**Почему это сильный ответ**
+**Почему это удачный ответ**
 
 - во вступлении есть проект, тема и *opinion polls*;
 - три факта с цифрами и с вопросом опроса;
