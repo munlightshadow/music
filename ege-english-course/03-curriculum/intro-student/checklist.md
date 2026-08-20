@@ -13,5 +13,5 @@
 - **содержание и организация** — как на экзамене, полностью;
 - **язык** — тьютор разбирает только уже пройденные темы.
 
-Презентация: [вводный-модуль.pptx](вводный-модуль.pptx), [PDF](../../pdf/03-curriculum/intro-student/вводный-модуль.pdf).  
+Презентация: [вводный-модуль.pptx](вводный-модуль.pptx), [PDF](../../pdf/03-curriculum/intro-student/вводный-модуль.pdf). Речь к показу: [presentation-script.md](presentation-script.md).  
 Памятки: [обзор](exam-tour.md), [бланки](answer-sheets.md), [1–3](oral-1-3.md), [37](task-37.md), [38](task-38.md), [4](task-4.md).

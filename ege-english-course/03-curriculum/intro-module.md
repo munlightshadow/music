@@ -14,9 +14,10 @@
 
 | Элемент | Где |
 | --- | --- |
-| **Презентация для ученика (72 слайда)** | [вводный-модуль.pptx](intro-student/вводный-модуль.pptx) — редактируемый PowerPoint / Google Slides; [PDF](../pdf/03-curriculum/intro-student/вводный-модуль.pdf). Сканы демоверсии 2025 и работ из мр Пч / мр УЧ |
+| **Презентация для ученика (67 слайдов)** | [вводный-модуль.pptx](intro-student/вводный-модуль.pptx) — редактируемый PowerPoint / Google Slides; [PDF](../pdf/03-curriculum/intro-student/вводный-модуль.pdf). Сканы демоверсии 2025 и работ из мр Пч / мр УЧ |
+| Речь к презентации | [intro-student/presentation-script.md](intro-student/presentation-script.md) — сплошной текст на показ 67 слайдов |
 | Слайды 1–7 вводного видео | [slides.md](../04-intro-video/slides.md) |
-| Речь эксперта | [script.md](../04-intro-video/script.md) |
+| Речь вводного видео | [script.md](../04-intro-video/script.md) |
 | Обзор всех заданий | [intro-student/exam-tour.md](intro-student/exam-tour.md) |
 | Бланки № 1, № 2 и устная часть | [intro-student/answer-sheets.md](intro-student/answer-sheets.md) |
 | Говорение 1–3 кратко | [intro-student/oral-1-3.md](intro-student/oral-1-3.md) |

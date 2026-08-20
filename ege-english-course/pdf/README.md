@@ -13,7 +13,8 @@
 Презентация вводного модуля для ученика (не из Markdown, отдельный генератор):
 
 - редактируемый PPTX: [../03-curriculum/intro-student/вводный-модуль.pptx](../03-curriculum/intro-student/вводный-модуль.pptx) (копия: [03-curriculum/intro-student/вводный-модуль.pptx](03-curriculum/intro-student/вводный-модуль.pptx))
-- [03-curriculum/intro-student/вводный-модуль.pdf](03-curriculum/intro-student/вводный-модуль.pdf) (72 слайда, со сканами демоверсии и работ)
+- [03-curriculum/intro-student/вводный-модуль.pdf](03-curriculum/intro-student/вводный-модуль.pdf) (67 слайдов, со сканами демоверсии и работ)
+- речь эксперту к показу: [../03-curriculum/intro-student/presentation-script.md](../03-curriculum/intro-student/presentation-script.md)
 - картинки: `03-curriculum/intro-student/img/`
 - пересобрать картинки: `python3 ege-english-course/scripts/extract_intro_images.py`
 - пересобрать PDF и PPTX: `python3 ege-english-course/scripts/intro_student_presentation.py` (нужен `python-pptx`)
