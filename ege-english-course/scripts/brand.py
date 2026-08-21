@@ -36,6 +36,10 @@ LOGO_SOURCE_PDF = BRAND_DIR / "logo-source.pdf"
 LOGO_ICON_PNG = BRAND_DIR / "logo-icon.png"
 LOGO_ROW_PNG = BRAND_DIR / "logo-row.png"
 LOGO_STACK_PNG = BRAND_DIR / "logo-stack.png"
+# Контрастный знак для тёмных слайдов (светлый диск) и белый маяк для титула.
+LOGO_ICON_ON_DARK_PNG = BRAND_DIR / "logo-icon-on-dark.png"
+LOGO_MARK_PNG = BRAND_DIR / "logo-mark.png"
+COVER_BG_PNG = BRAND_DIR / "cover-bg.png"
 
 
 def hex_of(rgb: tuple[int, int, int]) -> str:

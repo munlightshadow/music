@@ -59,16 +59,25 @@ h1 {
 h2 { font-size: 20pt; color: #468A9D; margin: 0 0 12px; }
 .cover {
   display: flex; flex-direction: column; justify-content: center;
-  align-items: center; text-align: center; height: 100%;
-  padding-bottom: 0.2in;
+  align-items: flex-start; text-align: left; height: 100%;
+  padding: 0.7in 5.6in 0.55in 0.95in;
 }
-.cover .logo-stack { height: 1.9in; width: auto; margin: 0 0 18px; }
+.cover .logo-stack { display: none; }
 .cover h1 {
-  font-size: 30pt; color: #214149; letter-spacing: 0.04em;
-  text-transform: uppercase; margin: 0 0 10px;
+  font-size: 34pt; color: #FFFFFF; letter-spacing: 0.04em;
+  text-transform: uppercase; margin: 0 0 14px;
 }
-.cover p { font-size: 16pt; margin: 6px 0; color: #494F55; }
-.cover-slide .logo-header, .cover-slide .logo-foot { display: none; }
+.cover p { font-size: 16pt; margin: 6px 0; color: #A5D2DF; }
+.cover-slide { background: #1A333A; }
+.cover-slide .cover-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+}
+.cover-slide .cover, .cover-slide .kicker, .cover-slide .pg { position: relative; z-index: 1; }
+.cover-slide .logo-header, .cover-slide .logo-foot,
+.cover-slide .gold-top, .cover-slide .teal-top,
+.cover-slide .gold-bot, .cover-slide .teal-bot { display: none; }
+.cover-slide .kicker, .cover-slide .pg { color: #A5D2DF; }
 .section-slide { background: #214149; color: #fff; }
 .section-slide h1 { color: #F3D593; }
 .section-slide .muted { color: #A5D2DF; }
@@ -142,17 +151,26 @@ th { background: #E4F1F4; color: #214149; }
 
 def wrap(inner: str, n: int, total: int, klass: str = "") -> str:
     extra = klass
+    header = '<img class="logo-header" src="img/logo-row.png" alt="Английский Маяк">'
+    foot_icon = '<img class="logo-foot" src="img/logo-icon.png" alt="">'
+    bg = ""
     if 'class="cover"' in inner:
         extra = f"{extra} cover-slide".strip()
+        header = ""
+        foot_icon = ""
+        bg = '<img class="cover-bg" src="img/cover-bg.png" alt="">'
     elif 'class="section"' in inner:
         extra = f"{extra} section-slide".strip()
+        header = ""
+        foot_icon = '<img class="logo-foot" src="img/logo-icon-on-dark.png" alt="">'
     return f"""
 <section class="slide {extra}">
+  {bg}
   <div class="gold-top"></div>
   <div class="teal-top"></div>
-  <img class="logo-header" src="img/logo-row.png" alt="Английский Маяк">
+  {header}
   {inner}
-  <img class="logo-foot" src="img/logo-icon.png" alt="">
+  {foot_icon}
   <div class="kicker">Английский Маяк · вводный модуль</div>
   <div class="pg">{n} / {total}</div>
   <div class="gold-bot"></div>
@@ -163,11 +181,7 @@ def wrap(inner: str, n: int, total: int, klass: str = "") -> str:
 
 def cover(title: str, *lines: str) -> str:
     ps = "".join(f"<p>{x}</p>" for x in lines)
-    return (
-        '<div class="cover">'
-        '<img class="logo-stack" src="img/logo-stack.png" alt="Английский Маяк">'
-        f"<h1>{title}</h1>{ps}</div>"
-    )
+    return f'<div class="cover"><h1>{title}</h1>{ps}</div>'
 
 
 def section(label: str, title: str, note: str = "") -> str:
@@ -665,9 +679,18 @@ def main() -> int:
     if img_tmp.exists():
         shutil.rmtree(img_tmp)
     shutil.copytree(IMG_DIR, img_tmp)
-    from brand import LOGO_ICON_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG
+    from brand import COVER_BG_PNG, LOGO_ICON_ON_DARK_PNG, LOGO_ICON_PNG, LOGO_MARK_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG
 
-    for src in (LOGO_ICON_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG):
+    for src in (
+        LOGO_ICON_PNG,
+        LOGO_ROW_PNG,
+        LOGO_STACK_PNG,
+        LOGO_ICON_ON_DARK_PNG,
+        LOGO_MARK_PNG,
+        COVER_BG_PNG,
+    ):
+        if src.exists():
+            shutil.copy2(src, img_tmp / src.name)
         shutil.copy2(src, img_tmp / src.name)
     html_path = TMP / "intro.html"
     html_path.write_text(doc, encoding="utf-8")

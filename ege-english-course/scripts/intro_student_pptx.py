@@ -34,7 +34,10 @@ from brand import (  # noqa: E402
     BORDER,
     OK,
     BAD,
+    COVER_BG_PNG,
+    LOGO_ICON_ON_DARK_PNG,
     LOGO_ICON_PNG,
+    LOGO_MARK_PNG,
     LOGO_ROW_PNG,
     LOGO_STACK_PNG,
 )
@@ -127,10 +130,13 @@ def add_logo_row(slide, x=None, y=0.16, h=0.40):
     slide.shapes.add_picture(str(LOGO_ROW_PNG), Inches(x), Inches(y), Inches(width), Inches(h))
 
 
-def add_logo_icon(slide, x=0.52, y=H - 0.46, h=0.32):
-    if not LOGO_ICON_PNG.exists():
+def add_logo_icon(slide, x=0.52, y=H - 0.46, h=0.32, on_dark=False):
+    path = LOGO_ICON_ON_DARK_PNG if on_dark else LOGO_ICON_PNG
+    if not path.exists():
+        path = LOGO_ICON_PNG
+    if not path.exists():
         return
-    slide.shapes.add_picture(str(LOGO_ICON_PNG), Inches(x), Inches(y), Inches(h), Inches(h))
+    slide.shapes.add_picture(str(path), Inches(x), Inches(y), Inches(h), Inches(h))
 
 
 def add_logo_stack(slide, y=0.55, h=1.85):
@@ -144,10 +150,12 @@ def add_logo_stack(slide, y=0.55, h=1.85):
     slide.shapes.add_picture(str(LOGO_STACK_PNG), Inches((W - w) / 2), Inches(y), Inches(w), Inches(h))
 
 
-def footer(slide, n, total, dark=False):
-    add_logo_icon(slide)
+def footer(slide, n, total, dark=False, show_icon=True):
+    if show_icon:
+        add_logo_icon(slide, on_dark=dark)
     color = SKY if dark else PAGE
-    add_text(slide, 0.95, H - 0.42, 9.2, 0.24, "Английский Маяк · вводный модуль", 10, color)
+    left = 0.95 if show_icon else 0.55
+    add_text(slide, left, H - 0.42, 9.2, 0.24, "Английский Маяк · вводный модуль", 10, color)
     add_text(slide, W - 1.85, H - 0.42, 1.15, 0.24, f"{n} / {total}", 11, color, align=PP_ALIGN.RIGHT)
 
 
@@ -312,22 +320,33 @@ def _col_shares(headers, n):
 
 
 def cover_slide(slide, root, n, total):
-    deco_bars(slide)
-    add_logo_stack(slide, y=0.45, h=1.7)
+    if COVER_BG_PNG.exists():
+        slide.shapes.add_picture(str(COVER_BG_PNG), Inches(0), Inches(0), Inches(W), Inches(H))
+    else:
+        add_rect(slide, 0, 0, W, H, TEAL_DARK)
+        if LOGO_MARK_PNG.exists():
+            from PIL import Image as PILImage
+
+            with PILImage.open(LOGO_MARK_PNG) as im:
+                aspect = im.width / im.height if im.height else 1
+            mh = 2.6
+            slide.shapes.add_picture(
+                str(LOGO_MARK_PNG), Inches(W - 0.55 - mh * aspect), Inches(H - 0.45 - mh), Inches(mh * aspect), Inches(mh)
+            )
     h1 = root.find(".//h1")
     ps = root.findall(".//p")
-    add_text(slide, 0.9, 2.35, 11.5, 1.15, node_text(h1).upper(), 30, TEAL_DARK, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
-    y = 3.55
+    add_text(slide, 0.85, 2.15, 7.4, 1.2, node_text(h1).upper(), 32, WHITE, True, anchor=MSO_ANCHOR.MIDDLE)
+    y = 3.45
     for p in ps:
-        add_text(slide, 1.2, y, 10.9, 0.55, node_text(p), 16, DARK, align=PP_ALIGN.CENTER)
-        y += 0.5
-    footer(slide, n, total)
+        add_text(slide, 0.85, y, 7.4, 0.5, node_text(p), 16, SKY)
+        y += 0.48
+    footer(slide, n, total, dark=True, show_icon=False)
 
 
 def section_slide(slide, root, n, total):
     add_rect(slide, 0, 0, W, H, TEAL_DARK)
     deco_bars(slide, dark=True)
-    add_logo_icon(slide, x=W - 0.95, y=0.22, h=0.42)
+    add_logo_icon(slide, x=W - 0.95, y=0.22, h=0.42, on_dark=True)
     num = root.find(".//div[@class='num']")
     h1 = root.find(".//h1")
     muted = root.find(".//p")
@@ -643,19 +662,20 @@ def write_pptx_template(path: Path | None = None) -> Path:
 
     # 1. Title
     s = prs.slides.add_slide(blank)
-    add_rect(s, 0, 0, W, H, WHITE)
-    deco_bars(s)
-    add_logo_stack(s, y=0.55, h=1.85)
-    add_text(s, 0.9, 2.55, 11.5, 0.9, "Название презентации", 32, TEAL_DARK, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
-    add_text(s, 1.4, 3.5, 10.5, 0.5, "Подзаголовок · модуль, занятие или встреча", 16, CHARCOAL, align=PP_ALIGN.CENTER)
-    add_text(s, 1.4, 4.15, 10.5, 0.4, "Английский Маяк · подготовка к ОГЭ и ЕГЭ по английскому", 14, TEAL, align=PP_ALIGN.CENTER)
-    footer(s, 1, total)
+    if COVER_BG_PNG.exists():
+        s.shapes.add_picture(str(COVER_BG_PNG), Inches(0), Inches(0), Inches(W), Inches(H))
+    else:
+        add_rect(s, 0, 0, W, H, TEAL_DARK)
+    add_text(s, 0.85, 2.15, 7.4, 1.0, "Название презентации", 32, WHITE, True, anchor=MSO_ANCHOR.MIDDLE)
+    add_text(s, 0.85, 3.35, 7.4, 0.45, "Подзаголовок · модуль, занятие или встреча", 16, SKY)
+    add_text(s, 0.85, 3.9, 7.4, 0.4, "Английский Маяк · подготовка к ОГЭ и ЕГЭ по английскому", 14, GOLD_LIGHT)
+    footer(s, 1, total, dark=True, show_icon=False)
 
     # 2. Section
     s = prs.slides.add_slide(blank)
     add_rect(s, 0, 0, W, H, TEAL_DARK)
     deco_bars(s, dark=True)
-    add_logo_icon(s, x=W - 0.95, y=0.22, h=0.42)
+    add_logo_icon(s, x=W - 0.95, y=0.22, h=0.42, on_dark=True)
     add_text(s, 0.85, 2.15, 11.6, 0.4, "ЧАСТЬ 1", 14, GOLD, True)
     add_text(s, 0.85, 2.55, 11.6, 1.6, "Название раздела", 40, GOLD_LIGHT, True)
     add_text(s, 0.85, 4.4, 11.6, 0.7, "Короткое пояснение, о чём этот блок", 16, SKY)

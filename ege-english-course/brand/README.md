@@ -27,9 +27,9 @@
 
 | Файл | Где ставить |
 | --- | --- |
-| [logo-stack.png](logo-stack.png) | обложка PDF, титульный слайд по центру |
-| [logo-row.png](logo-row.png) | шапка документа и правый верх контентного слайда |
-| [logo-icon.png](logo-icon.png) | подвал, тёмные слайды-разделы, маленькая марка |
+| [logo-stack.png](logo-stack.png) / [logo-row.png](logo-row.png) / [logo-icon.png](logo-icon.png) | **светлые** страницы: тёмный диск маяка |
+| [logo-icon-on-dark.png](logo-icon-on-dark.png) | **тёмные** слайды-разделы: светлый диск |
+| [logo-mark.png](logo-mark.png) + [cover-bg.png](cover-bg.png) | **титул**: синий градиент брендбука, маяк белый с жёлтыми лучами справа внизу |
 
 Пересобрать PNG:
 
