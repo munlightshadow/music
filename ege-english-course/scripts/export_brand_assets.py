@@ -150,27 +150,29 @@ def make_row(icon: Image.Image, word: Image.Image) -> Image.Image:
     return canvas
 
 
-def make_icon_on_dark(icon: Image.Image) -> Image.Image:
-    """Светлый диск маяка — на тёмную страницу (лого «на светлом фоне»)."""
+def make_icon_frame4(icon: Image.Image) -> Image.Image:
+    """Frame 4 — ночной диск: тёмное небо, белый маяк, золотые лучи, тонкая бирюзовая обводка."""
     im = icon.convert("RGBA")
     px = im.load()
     w, h = im.size
-    pale = (232, 242, 245, 255)
+    night = (10, 24, 32, 255)
     for y in range(h):
         for x in range(w):
             r, g, b, a = px[x, y]
             if a < 8:
                 continue
             if r > 180 and g > 140 and b < 170:
-                continue  # gold beams
+                continue  # gold
             if r > 220 and g > 220 and b > 220:
                 continue  # white tower / waves
-            if g > r + 18 and b > r + 18 and g > 72:
-                px[x, y] = pale
+            # средний бирюзовый небосвод Frame 5 → ночь Frame 4
+            if g > r + 12 and b > r + 8 and g > 70 and max(r, g, b) > 90:
+                px[x, y] = night
     from PIL import ImageDraw
 
     draw = ImageDraw.Draw(im)
-    draw.ellipse((3, 3, w - 4, h - 4), outline=(0x21, 0x41, 0x49, 255), width=max(4, w // 90))
+    teal = (0x46, 0x8A, 0x9D, 255)
+    draw.ellipse((2, 2, w - 3, h - 3), outline=teal, width=max(3, w // 110))
     return im
 
 
@@ -245,15 +247,20 @@ def main() -> int:
     if sb:
         stack = stack.crop(pad_bbox(sb, stack.size, 4))
     row = make_row(icon, flood_white_from_edges(word))
-    icon_dark = make_icon_on_dark(icon)
+    icon_frame4 = make_icon_frame4(icon)
     mark = make_white_mark(icon)
     cover = make_cover_bg(mark)
 
     BRAND_DIR.mkdir(parents=True, exist_ok=True)
+    frame5 = BRAND_DIR / "logo-frame5.pdf"
+    if src.resolve() != frame5.resolve():
+        import shutil
+
+        shutil.copy2(src, frame5)
     icon.save(LOGO_ICON_PNG)
     row.save(LOGO_ROW_PNG)
     stack.save(LOGO_STACK_PNG)
-    icon_dark.save(LOGO_ICON_ON_DARK_PNG)
+    icon_frame4.save(LOGO_ICON_ON_DARK_PNG)
     mark.save(LOGO_MARK_PNG)
     cover.save(COVER_BG_PNG)
     for p in (
