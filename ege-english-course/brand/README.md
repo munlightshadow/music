@@ -14,7 +14,7 @@
 
 На слайдах `#214149` ставим только диск тёмного кадра: набор `#214149` на том же цвете не читается.
 
-Векторы дизайнера: [logo-frame-light.pdf](logo-frame-light.pdf), [logo-frame-dark.pdf](logo-frame-dark.pdf). `logo-source.pdf` — копия светлого.
+Исходники: [logo-frame-light.pdf](logo-frame-light.pdf), [logo-frame-dark.pdf](logo-frame-dark.pdf). PNG вырезаются из растра страницы (вектор в PDF неполный). `logo-source.pdf` — копия светлого.
 
 ## Палитра
 

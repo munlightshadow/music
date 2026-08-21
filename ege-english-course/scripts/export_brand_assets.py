@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Собрать PNG из двух векторных файлов дизайнера.
+"""Вырезать PNG-логотипы из растра PDF дизайнера.
 
-Светлый кадр — светлый круг вокруг маяка.
-Тёмный кадр — тёмный (бирюзовый) круг вокруг маяка.
+Вектор в файле неполный (Type 3, пустые глифы). Страницу растрируем
+и кропаем lockup как на макете — без пересборки круга.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 from collections import deque
+from collections.abc import Callable
 from pathlib import Path
 
 from PIL import Image
@@ -34,19 +35,22 @@ from brand import (
 )
 
 TMP = Path("/tmp/ege-logo-src")
-DPI = 144  # 2500 pt → 5000 px
-PDF_PT = 2500
-# Круг маяка в координатах PDF (pt), как в файле дизайнера.
-CIRCLE_CX, CIRCLE_CY, CIRCLE_R = 1250.0, 1089.0, 231.0
+DPI = 216  # 2500 pt → 7500 px
 
 
-def flood_white_from_edges(im: Image.Image, threshold: int = 250) -> Image.Image:
-    """Убрать белый холст с краёв (для наборного логотипа)."""
+def flood_white_from_edges(
+    im: Image.Image,
+    threshold: int = 250,
+    protect: Callable[[int, int], bool] | None = None,
+) -> Image.Image:
+    """Прозрачный холст с краёв. protect — диск маяка, белое небо не трогаем."""
     im = im.convert("RGBA")
     w, h = im.size
     px = im.load()
 
     def is_bg(x: int, y: int) -> bool:
+        if protect is not None and protect(x, y):
+            return False
         r, g, b, a = px[x, y]
         return a > 0 and r >= threshold and g >= threshold and b >= threshold
 
@@ -100,21 +104,6 @@ def pad_bbox(bbox: tuple[int, int, int, int], size: tuple[int, int], pad: int) -
     return max(0, l - pad), max(0, t - pad), min(w, r + pad), min(h, b + pad)
 
 
-def knock_outside_circle(im: Image.Image) -> Image.Image:
-    """Прозрачность снаружи диска. Белое небо и белая башня внутри остаются."""
-    im = im.convert("RGBA")
-    w, h = im.size
-    cx, cy = (w - 1) / 2.0, (h - 1) / 2.0
-    rad = min(w, h) / 2.0 - 0.5
-    r2 = rad * rad
-    px = im.load()
-    for y in range(h):
-        for x in range(w):
-            if (x - cx) ** 2 + (y - cy) ** 2 > r2:
-                px[x, y] = (255, 255, 255, 0)
-    return im
-
-
 def render_pdf(pdf: Path, prefix: str) -> Image.Image:
     TMP.mkdir(parents=True, exist_ok=True)
     stem = TMP / prefix
@@ -127,9 +116,57 @@ def render_pdf(pdf: Path, prefix: str) -> Image.Image:
     return Image.open(pages[0]).convert("RGBA")
 
 
-def circle_px(page: Image.Image) -> tuple[float, float, float]:
-    scale = page.width / PDF_PT
-    return CIRCLE_CX * scale, CIRCLE_CY * scale, CIRCLE_R * scale
+def split_emblem_word(lock: Image.Image) -> tuple[Image.Image, Image.Image, int]:
+    """Круг сверху, набор снизу — по щели в растре страницы."""
+    w, h = lock.size
+    px = lock.load()
+    ink_rows: list[int] = []
+    for y in range(h):
+        n = 0
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a > 8 and (r < 250 or g < 250 or b < 250):
+                n += 1
+        if n > 12:
+            ink_rows.append(y)
+    if not ink_rows:
+        raise SystemExit("empty lockup crop")
+    gap_y = int(h * 0.62)
+    for i in range(1, len(ink_rows)):
+        if ink_rows[i] - ink_rows[i - 1] > 30:
+            gap_y = (ink_rows[i - 1] + ink_rows[i]) // 2
+            break
+    emblem = lock.crop((0, 0, w, gap_y))
+    word = lock.crop((0, gap_y, w, h))
+    return emblem, word, gap_y
+
+
+def fitted_circle(emblem: Image.Image) -> tuple[float, float, float]:
+    bb = content_bbox(emblem)
+    if not bb:
+        w, h = emblem.size
+        return (w - 1) / 2.0, (h - 1) / 2.0, min(w, h) / 2.0
+    l, t, r, b = bb
+    cx = (l + r - 1) / 2.0
+    cy = (t + b - 1) / 2.0
+    rad = max(r - l, b - t) / 2.0 + 1.5
+    return cx, cy, rad
+
+
+def knock_outside_circle(im: Image.Image, circle: tuple[float, float, float]) -> Image.Image:
+    im = im.convert("RGBA")
+    cx, cy, rad = circle
+    r2 = rad * rad
+    px = im.load()
+    w, h = im.size
+    for y in range(h):
+        for x in range(w):
+            if (x - cx) ** 2 + (y - cy) ** 2 > r2:
+                px[x, y] = (255, 255, 255, 0)
+    bb = content_bbox(im)
+    if bb:
+        im = im.crop(pad_bbox(bb, im.size, 2))
+    return im
 
 
 def make_row(icon: Image.Image, word: Image.Image) -> Image.Image:
@@ -145,38 +182,34 @@ def make_row(icon: Image.Image, word: Image.Image) -> Image.Image:
     return canvas
 
 
-def make_stack(icon: Image.Image, word: Image.Image) -> Image.Image:
-    gap = max(16, int(icon.height * 0.08))
-    width = max(icon.width, word.width)
-    height = icon.height + gap + word.height
-    canvas = Image.new("RGBA", (width, height), (255, 255, 255, 0))
-    canvas.paste(icon, ((width - icon.width) // 2, 0), icon)
-    canvas.paste(word, ((width - word.width) // 2, icon.height + gap), word)
-    return canvas
+def lockup_from_page(page: Image.Image) -> tuple[Image.Image, Image.Image, Image.Image]:
+    """Вырезать lockup с страницы PDF как есть."""
+    bbox = content_bbox(page)
+    if not bbox:
+        raise SystemExit("PDF page looks empty")
+    lock = page.crop(pad_bbox(bbox, page.size, 6))
+    emblem, word, _gap = split_emblem_word(lock)
+    cx, cy, rad = fitted_circle(emblem)
 
+    def protect(x: int, y: int) -> bool:
+        return (x - cx) ** 2 + (y - cy) ** 2 <= rad * rad
 
-def lockup_from_page(page: Image.Image) -> tuple[Image.Image, Image.Image, Image.Image, Image.Image]:
-    """Диск + набор из одной страницы дизайнера. Круг не заливаем — там может быть белое небо."""
-    cx, cy, rad = circle_px(page)
-    pad = 4
-    box = (
-        max(0, int(cx - rad - pad)),
-        max(0, int(cy - rad - pad)),
-        min(page.width, int(cx + rad + pad) + 1),
-        min(page.height, int(cy + rad + pad) + 1),
-    )
-    icon = knock_outside_circle(page.crop(box))
-    word_top = min(page.height - 1, int(cy + rad + 8))
-    word = flood_white_from_edges(page.crop((0, word_top, page.width, page.height)))
-    wb = content_bbox(word)
+    stack = flood_white_from_edges(lock, protect=protect)
+    sb = content_bbox(stack)
+    if sb:
+        stack = stack.crop(pad_bbox(sb, stack.size, 2))
+    icon = knock_outside_circle(emblem, (cx, cy, rad))
+    word_c = flood_white_from_edges(word)
+    wb = content_bbox(word_c)
     if not wb:
         raise SystemExit("wordmark not found under the circle")
-    word = word.crop(pad_bbox(wb, word.size, 2))
-    return icon, word, make_stack(icon, word), make_row(icon, word)
+    word_c = word_c.crop(pad_bbox(wb, word_c.size, 2))
+    row = make_row(icon, word_c)
+    return icon, stack, row
 
 
 def make_white_mark(icon: Image.Image) -> Image.Image:
-    """Маяк белый с жёлтыми лучами, без заливки круга — на синий титул."""
+    """Маяк белый с жёлтыми лучами — на синий титул."""
     src = icon.convert("RGBA")
     px = src.load()
     w, h = src.size
@@ -228,13 +261,12 @@ def main() -> int:
     light_pdf = LOGO_FRAME_LIGHT_PDF if LOGO_FRAME_LIGHT_PDF.exists() else LOGO_SOURCE_PDF
     dark_pdf = LOGO_FRAME_DARK_PDF
     if not light_pdf.exists():
-        raise SystemExit(f"Нет светлого вектора {light_pdf}")
+        raise SystemExit(f"Нет светлого PDF {light_pdf}")
     if not dark_pdf.exists():
-        raise SystemExit(f"Нет тёмного вектора {dark_pdf}")
+        raise SystemExit(f"Нет тёмного PDF {dark_pdf}")
 
-    icon_l, _word_l, stack_l, row_l = lockup_from_page(render_pdf(light_pdf, "light"))
-    icon_d, _word_d, stack_d, row_d = lockup_from_page(render_pdf(dark_pdf, "dark"))
-    # Белый маяк для титула — из тёмного круга: башня не сливается с небом.
+    icon_l, stack_l, row_l = lockup_from_page(render_pdf(light_pdf, "light"))
+    icon_d, stack_d, row_d = lockup_from_page(render_pdf(dark_pdf, "dark"))
     mark = make_white_mark(icon_d)
     cover = make_cover_bg(mark)
 
