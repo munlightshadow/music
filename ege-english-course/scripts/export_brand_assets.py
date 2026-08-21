@@ -208,30 +208,55 @@ def lockup_from_page(page: Image.Image) -> tuple[Image.Image, Image.Image, Image
     return icon, stack, row
 
 
-def make_white_mark(icon: Image.Image) -> Image.Image:
-    """Маяк белый с жёлтыми лучами — на синий титул."""
-    src = icon.convert("RGBA")
-    px = src.load()
-    w, h = src.size
+def _is_gold(r: int, g: int, b: int) -> bool:
+    return r > 180 and g > 140 and b < 170 and r > b + 10
+
+
+def _is_near_white(r: int, g: int, b: int) -> bool:
+    return r > 210 and g > 210 and b > 210
+
+
+def make_white_mark(icon_light: Image.Image, icon_dark: Image.Image) -> Image.Image:
+    """Маяк белый с жёлтыми лучами, без диска — на синий титул.
+
+    На тёмном кадре белая половина башни читается, но правая сливается
+    с небом; на светлом — наоборот. Силуэт = объединение, кольцо круга
+    (тонкая обводка у края) отбрасываем, лучи оставляем.
+    """
+    light = icon_light.convert("RGBA")
+    dark = icon_dark.convert("RGBA")
+    if dark.size != light.size:
+        dark = dark.resize(light.size, Image.Resampling.LANCZOS)
+    w, h = light.size
+    cx, cy = (w - 1) / 2.0, (h - 1) / 2.0
+    rad = min(w, h) / 2.0
+    ring_band = 24.0
+    ring2 = (rad - ring_band) ** 2
+    lp, dp = light.load(), dark.load()
     out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     opx = out.load()
-    cx = w / 2
     for y in range(h):
         for x in range(w):
-            r, g, b, a = px[x, y]
-            if a < 8:
+            lr, lg, lb, la = lp[x, y]
+            dr, dg, db, da = dp[x, y]
+            gold_d = da > 8 and _is_gold(dr, dg, db)
+            gold_l = la > 8 and _is_gold(lr, lg, lb)
+            if gold_d:
+                opx[x, y] = (dr, dg, db, da)
                 continue
-            if r > 180 and g > 140 and b < 170:
-                opx[x, y] = (r, g, b, a)
+            if gold_l:
+                opx[x, y] = (lr, lg, lb, la)
                 continue
-            if r > 210 and g > 210 and b > 210:
-                opx[x, y] = (255, 255, 255, a)
+            if (x - cx) ** 2 + (y - cy) ** 2 > ring2:
                 continue
-            if max(r, g, b) < 95 and abs(x - cx) < w * 0.22 and y < h * 0.78:
-                opx[x, y] = (255, 255, 255, a)
+            if da > 8 and _is_near_white(dr, dg, db):
+                opx[x, y] = (255, 255, 255, da)
+                continue
+            if la > 8 and not _is_near_white(lr, lg, lb):
+                opx[x, y] = (255, 255, 255, la)
     bbox = out.getbbox()
     if bbox:
-        out = out.crop(pad_bbox(bbox, out.size, 8))
+        out = out.crop(pad_bbox(bbox, out.size, 4))
     return out
 
 
@@ -267,7 +292,7 @@ def main() -> int:
 
     icon_l, stack_l, row_l = lockup_from_page(render_pdf(light_pdf, "light"))
     icon_d, stack_d, row_d = lockup_from_page(render_pdf(dark_pdf, "dark"))
-    mark = make_white_mark(icon_d)
+    mark = make_white_mark(icon_l, icon_d)
     cover = make_cover_bg(mark)
 
     BRAND_DIR.mkdir(parents=True, exist_ok=True)
