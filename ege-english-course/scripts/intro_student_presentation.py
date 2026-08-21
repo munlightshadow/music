@@ -679,19 +679,29 @@ def main() -> int:
     if img_tmp.exists():
         shutil.rmtree(img_tmp)
     shutil.copytree(IMG_DIR, img_tmp)
-    from brand import COVER_BG_PNG, LOGO_ICON_ON_DARK_PNG, LOGO_ICON_PNG, LOGO_MARK_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG
+    from brand import (
+        COVER_BG_PNG,
+        LOGO_ICON_ON_DARK_PNG,
+        LOGO_ICON_PNG,
+        LOGO_MARK_PNG,
+        LOGO_ROW_ON_DARK_PNG,
+        LOGO_ROW_PNG,
+        LOGO_STACK_ON_DARK_PNG,
+        LOGO_STACK_PNG,
+    )
 
     for src in (
         LOGO_ICON_PNG,
         LOGO_ROW_PNG,
         LOGO_STACK_PNG,
         LOGO_ICON_ON_DARK_PNG,
+        LOGO_ROW_ON_DARK_PNG,
+        LOGO_STACK_ON_DARK_PNG,
         LOGO_MARK_PNG,
         COVER_BG_PNG,
     ):
         if src.exists():
             shutil.copy2(src, img_tmp / src.name)
-        shutil.copy2(src, img_tmp / src.name)
     html_path = TMP / "intro.html"
     html_path.write_text(doc, encoding="utf-8")
     OUT_PDF.parent.mkdir(parents=True, exist_ok=True)

@@ -33,11 +33,14 @@ TAGLINE = "подготовка к ОГЭ и ЕГЭ по английскому"
 COURSE = "Курс подготовки к ЕГЭ по английскому"
 
 LOGO_SOURCE_PDF = BRAND_DIR / "logo-source.pdf"
+LOGO_FRAME5_PDF = BRAND_DIR / "logo-frame5.pdf"
 LOGO_ICON_PNG = BRAND_DIR / "logo-icon.png"
 LOGO_ROW_PNG = BRAND_DIR / "logo-row.png"
 LOGO_STACK_PNG = BRAND_DIR / "logo-stack.png"
-# Контрастный знак для тёмных слайдов (светлый диск) и белый маяк для титула.
+# Frame 4 — тёмный кадр (ночной диск + бирюзовый логотип).
 LOGO_ICON_ON_DARK_PNG = BRAND_DIR / "logo-icon-on-dark.png"
+LOGO_ROW_ON_DARK_PNG = BRAND_DIR / "logo-row-on-dark.png"
+LOGO_STACK_ON_DARK_PNG = BRAND_DIR / "logo-stack-on-dark.png"
 LOGO_MARK_PNG = BRAND_DIR / "logo-mark.png"
 COVER_BG_PNG = BRAND_DIR / "cover-bg.png"
 

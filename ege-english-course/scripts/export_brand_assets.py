@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Собрать PNG-логотипы из векторного файла дизайнера (Frame_4)."""
+"""Собрать PNG-логотипы: Frame 5 (светлый вектор) и Frame 4 (тёмный кадр)."""
 
 from __future__ import annotations
 
 import subprocess
 import sys
 from collections import deque
+from collections.abc import Callable
 from pathlib import Path
 
 from PIL import Image
@@ -14,11 +15,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from brand import (
     BRAND_DIR,
     COVER_BG_PNG,
+    LOGO_FRAME5_PDF,
     LOGO_ICON_ON_DARK_PNG,
     LOGO_ICON_PNG,
     LOGO_MARK_PNG,
+    LOGO_ROW_ON_DARK_PNG,
     LOGO_ROW_PNG,
+    LOGO_STACK_ON_DARK_PNG,
     LOGO_STACK_PNG,
+    TEAL,
     TEAL_DEEP,
     TEAL_MID,
 )
@@ -28,13 +33,19 @@ TMP = Path("/tmp/ege-logo-src")
 DPI = 144  # страница 2500 pt → 5000 px
 
 
-def flood_white_from_edges(im: Image.Image, threshold: int = 250) -> Image.Image:
-    """Убрать белый холст, не трогая белую башню и скалы внутри круга."""
+def flood_white_from_edges(
+    im: Image.Image,
+    threshold: int = 250,
+    protect: Callable[[int, int], bool] | None = None,
+) -> Image.Image:
+    """Убрать белый холст. protect(x, y) — пиксели внутри круга, их не трогаем."""
     im = im.convert("RGBA")
     w, h = im.size
     px = im.load()
 
     def is_bg(x: int, y: int) -> bool:
+        if protect is not None and protect(x, y):
+            return False
         r, g, b, a = px[x, y]
         return a > 0 and r >= threshold and g >= threshold and b >= threshold
 
@@ -58,6 +69,61 @@ def flood_white_from_edges(im: Image.Image, threshold: int = 250) -> Image.Image
             continue
         px[x, y] = (255, 255, 255, 0)
         q.extend(((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+    return im
+
+
+def find_emblem_circle(im: Image.Image) -> tuple[float, float, float] | None:
+    """Окружность цветного диска — по бирюзовому небу/воде."""
+    px = im.load()
+    w, h = im.size
+    minx, miny, maxx, maxy = w, h, -1, -1
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 8:
+                continue
+            if g > r + 8 and b > r + 4 and g > 70 and max(r, g, b) > 90:
+                if x < minx:
+                    minx = x
+                if y < miny:
+                    miny = y
+                if x > maxx:
+                    maxx = x
+                if y > maxy:
+                    maxy = y
+    if maxx < 0:
+        return None
+    cx = (minx + maxx) / 2.0
+    cy = (miny + maxy) / 2.0
+    rad = max(maxx - minx, maxy - miny) / 2.0 + 3
+    return cx, cy, rad
+
+
+def circle_protect(circle: tuple[float, float, float] | None):
+    if circle is None:
+        return None
+    cx, cy, rad = circle
+
+    def protect(x: int, y: int) -> bool:
+        return (x - cx) ** 2 + (y - cy) ** 2 <= rad * rad
+
+    return protect
+
+
+def knock_outside_circle(im: Image.Image, circle: tuple[float, float, float] | None = None) -> Image.Image:
+    """Прозрачность только снаружи диска — белая башня внутри остаётся."""
+    im = im.convert("RGBA")
+    circle = circle or find_emblem_circle(im)
+    if circle is None:
+        return im
+    cx, cy, rad = circle
+    px = im.load()
+    w, h = im.size
+    r2 = rad * rad
+    for y in range(h):
+        for x in range(w):
+            if (x - cx) ** 2 + (y - cy) ** 2 > r2:
+                px[x, y] = (255, 255, 255, 0)
     return im
 
 
@@ -150,29 +216,144 @@ def make_row(icon: Image.Image, word: Image.Image) -> Image.Image:
     return canvas
 
 
+def make_stack(icon: Image.Image, word: Image.Image) -> Image.Image:
+    """Vertical lockup: circular mark above the designer wordmark."""
+    gap = max(16, int(icon.height * 0.08))
+    width = max(icon.width, word.width)
+    height = icon.height + gap + word.height
+    canvas = Image.new("RGBA", (width, height), (255, 255, 255, 0))
+    canvas.paste(icon, ((width - icon.width) // 2, 0), icon)
+    canvas.paste(word, ((width - word.width) // 2, icon.height + gap), word)
+    return canvas
+
+
+def _is_gold(r: int, g: int, b: int) -> bool:
+    return r > 180 and g > 140 and b < 170 and r + g > b * 2
+
+
+def _is_white(r: int, g: int, b: int) -> bool:
+    return r > 220 and g > 220 and b > 220
+
+
+def _is_sky(r: int, g: int, b: int) -> bool:
+    """Бирюзовый небосвод / вода Frame 5 (не золото, не башня)."""
+    return g > r + 8 and b > r + 4 and g > 70 and max(r, g, b) > 90
+
+
 def make_icon_frame4(icon: Image.Image) -> Image.Image:
-    """Frame 4 — ночной диск: тёмное небо, белый маяк, золотые лучи, тонкая бирюзовая обводка."""
+    """Frame 4 — ночной диск: тёмное небо, белый маяк, чёрный купол, синие волны, бирюзовая обводка."""
+    from PIL import ImageDraw
+
     im = icon.convert("RGBA")
     px = im.load()
     w, h = im.size
-    night = (10, 24, 32, 255)
+    cx, cy = (w - 1) / 2.0, (h - 1) / 2.0
+    rad = min(w, h) / 2.0 - 1
+    night = (12, 22, 32, 255)
+    rock = (10, 12, 16, 255)
+    shadow = (186, 216, 226, 255)
+    wave = (70, 138, 157, 255)
+    dome = (8, 10, 12, 255)
+    ring = (*TEAL, 255)
+
+    def in_circle(x: int, y: int, inset: float = 0.0) -> bool:
+        return (x - cx) ** 2 + (y - cy) ** 2 <= (rad - inset) ** 2
+
+    # 1) небо/вода → ночь (окна-прорези тоже становятся тёмными)
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 8 or not in_circle(x, y):
+                continue
+            if _is_gold(r, g, b):
+                continue
+            if _is_sky(r, g, b):
+                px[x, y] = night
+
+    # 2) тёмная половина башни → светло-голубая тень (башня читается белой)
+    for y in range(h):
+        ny = y / h
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 8 or not in_circle(x, y):
+                continue
+            if _is_gold(r, g, b) or _is_white(r, g, b):
+                continue
+            # уже ночное небо / прорези окон — не высветлять
+            if r <= 20 and g <= 32 and b <= 42:
+                continue
+            if max(r, g, b) < 100 and abs(x - cx) < w * 0.24 and 0.16 < ny < 0.68:
+                px[x, y] = shadow
+
+    # 3) белые скалы → тёмные; тонкие белые линии в воде → бирюза
+    for y in range(h):
+        ny = y / h
+        if ny < 0.66:
+            continue
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 8 or not in_circle(x, y) or not _is_white(r, g, b):
+                continue
+            run = 0
+            for dy in range(-6, 7):
+                yy = y + dy
+                if 0 <= yy < h:
+                    rr, gg, bb, aa = px[x, yy]
+                    if aa > 8 and _is_white(rr, gg, bb):
+                        run += 1
+            if run <= 4:
+                px[x, y] = wave
+            else:
+                px[x, y] = rock
+
+    # 3b) оставшаяся вода Frame 5 → ночь, волны уже бирюзовые
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 8 or not in_circle(x, y):
+                continue
+            if _is_gold(r, g, b) or _is_white(r, g, b):
+                continue
+            if g > r + 8 and b > r and max(r, g, b) < 120:
+                px[x, y] = night
+
+    # 4) чёрный купол над фонарём
+    for y in range(h):
+        ny = y / h
+        if ny < 0.12 or ny > 0.22:
+            continue
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 8 or not in_circle(x, y):
+                continue
+            if _is_gold(r, g, b):
+                continue
+            if abs(x - cx) < w * 0.075 and (_is_white(r, g, b) or max(r, g, b) > 140):
+                px[x, y] = dome
+
+    draw = ImageDraw.Draw(im)
+    ring_w = max(4, w // 90)
+    draw.ellipse((2, 2, w - 3, h - 3), outline=ring, width=ring_w)
+    return im
+
+
+def recolor_word_teal(word: Image.Image) -> Image.Image:
+    """Frame 4: тёмный наборный логотип → бирюза #468A9D, антиалиас сохраняется альфой."""
+    im = word.convert("RGBA")
+    px = im.load()
+    w, h = im.size
+    tr, tg, tb = TEAL
     for y in range(h):
         for x in range(w):
             r, g, b, a = px[x, y]
             if a < 8:
                 continue
-            if r > 180 and g > 140 and b < 170:
-                continue  # gold
-            if r > 220 and g > 220 and b > 220:
-                continue  # white tower / waves
-            # средний бирюзовый небосвод Frame 5 → ночь Frame 4
-            if g > r + 12 and b > r + 8 and g > 70 and max(r, g, b) > 90:
-                px[x, y] = night
-    from PIL import ImageDraw
-
-    draw = ImageDraw.Draw(im)
-    teal = (0x46, 0x8A, 0x9D, 255)
-    draw.ellipse((2, 2, w - 3, h - 3), outline=teal, width=max(3, w // 110))
+            lum = (r + g + b) / 3.0
+            if lum >= 248:
+                px[x, y] = (255, 255, 255, 0)
+                continue
+            k = max(0.0, min(1.0, (248 - lum) / 215.0))
+            px[x, y] = (tr, tg, tb, int(round(a * k)))
     return im
 
 
@@ -237,30 +418,40 @@ def main() -> int:
         raise SystemExit("designer PDF looks empty")
     lock = page.crop(pad_bbox(bbox, page.size, 8))
     emblem, word = split_lockup(lock)
+    circle = find_emblem_circle(emblem)
+    protect = circle_protect(circle)
 
-    icon = flood_white_from_edges(emblem)
+    icon = knock_outside_circle(emblem, circle)
     ib = content_bbox(icon)
     if ib:
+        # content_bbox игнорирует белое — сдвигаем protect? после crop координаты круга меняются.
+        # проще ещё раз вырезать по кругу в новых координатах.
         icon = icon.crop(pad_bbox(ib, icon.size, 2))
-    stack = flood_white_from_edges(lock)
+        icon = knock_outside_circle(icon)
+    word_clear = flood_white_from_edges(word)
+    stack = flood_white_from_edges(lock, protect=protect)
     sb = content_bbox(stack)
     if sb:
         stack = stack.crop(pad_bbox(sb, stack.size, 4))
-    row = make_row(icon, flood_white_from_edges(word))
+    row = make_row(icon, word_clear)
     icon_frame4 = make_icon_frame4(icon)
+    word_frame4 = recolor_word_teal(word_clear)
+    row_frame4 = make_row(icon_frame4, word_frame4)
+    stack_frame4 = make_stack(icon_frame4, word_frame4)
     mark = make_white_mark(icon)
     cover = make_cover_bg(mark)
 
     BRAND_DIR.mkdir(parents=True, exist_ok=True)
-    frame5 = BRAND_DIR / "logo-frame5.pdf"
-    if src.resolve() != frame5.resolve():
+    if src.resolve() != LOGO_FRAME5_PDF.resolve():
         import shutil
 
-        shutil.copy2(src, frame5)
+        shutil.copy2(src, LOGO_FRAME5_PDF)
     icon.save(LOGO_ICON_PNG)
     row.save(LOGO_ROW_PNG)
     stack.save(LOGO_STACK_PNG)
     icon_frame4.save(LOGO_ICON_ON_DARK_PNG)
+    row_frame4.save(LOGO_ROW_ON_DARK_PNG)
+    stack_frame4.save(LOGO_STACK_ON_DARK_PNG)
     mark.save(LOGO_MARK_PNG)
     cover.save(COVER_BG_PNG)
     for p in (
@@ -268,6 +459,8 @@ def main() -> int:
         LOGO_ROW_PNG,
         LOGO_STACK_PNG,
         LOGO_ICON_ON_DARK_PNG,
+        LOGO_ROW_ON_DARK_PNG,
+        LOGO_STACK_ON_DARK_PNG,
         LOGO_MARK_PNG,
         COVER_BG_PNG,
     ):
