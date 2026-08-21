@@ -114,14 +114,17 @@ def deco_bars(slide, dark=False):
     add_rect(slide, 0, H - 0.10, W, 0.03, GOLD)
 
 
-def add_logo_row(slide, x=10.35, y=0.16, h=0.42):
+def add_logo_row(slide, x=None, y=0.16, h=0.40):
     if not LOGO_ROW_PNG.exists():
         return
     from PIL import Image as PILImage
 
     with PILImage.open(LOGO_ROW_PNG) as im:
         aspect = im.width / im.height if im.height else 3.6
-    slide.shapes.add_picture(str(LOGO_ROW_PNG), Inches(x), Inches(y), Inches(h * aspect), Inches(h))
+    width = h * aspect
+    if x is None:
+        x = W - 0.52 - width
+    slide.shapes.add_picture(str(LOGO_ROW_PNG), Inches(x), Inches(y), Inches(width), Inches(h))
 
 
 def add_logo_icon(slide, x=0.52, y=H - 0.46, h=0.32):

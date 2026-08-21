@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Собрать PNG-логотипы из SVG через Chrome (для PDF и PPTX)."""
+"""Собрать PNG-логотипы из векторного файла дизайнера (Frame_4)."""
 
 from __future__ import annotations
 
@@ -11,39 +11,15 @@ from pathlib import Path
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from brand import BRAND_DIR, LOGO_ICON_PNG, LOGO_ICON_SVG, LOGO_ROW_PNG, LOGO_STACK_PNG, hex_of, TEAL_DARK
-from intro_student_presentation import CHROME, CHROME_PROFILE
+from brand import BRAND_DIR, LOGO_ICON_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG
 
-TMP = Path("/tmp/ege-brand")
-TAG_GRAY = "#707070"
-FONT = 'Inter, "Noto Sans", Arial, sans-serif'
-
-
-def chrome_shot(html: Path, png: Path, w: int, h: int) -> None:
-    CHROME_PROFILE.mkdir(parents=True, exist_ok=True)
-    png.parent.mkdir(parents=True, exist_ok=True)
-    cmd = [
-        CHROME,
-        "--headless",
-        "--disable-gpu",
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-        "--hide-scrollbars",
-        "--no-first-run",
-        "--no-default-browser-check",
-        "--allow-file-access-from-files",
-        f"--window-size={w},{h}",
-        f"--screenshot={png}",
-        f"--user-data-dir={CHROME_PROFILE}",
-        html.resolve().as_uri(),
-    ]
-    result = subprocess.run(cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=60)
-    if result.returncode != 0 or not png.exists() or png.stat().st_size < 200:
-        raise SystemExit(f"Chrome screenshot failed for {html.name}\n{result.stderr[-2000:]}")
+SOURCE_PDF = BRAND_DIR / "logo-source.pdf"
+TMP = Path("/tmp/ege-logo-src")
+DPI = 144  # страница 2500 pt → 5000 px
 
 
-def flood_white_from_edges(im: Image.Image, threshold: int = 248) -> Image.Image:
-    """Drop page background only. Keep the white lighthouse inside the circle."""
+def flood_white_from_edges(im: Image.Image, threshold: int = 250) -> Image.Image:
+    """Убрать белый холст, не трогая белую башню и скалы внутри круга."""
     im = im.convert("RGBA")
     w, h = im.size
     px = im.load()
@@ -75,80 +51,120 @@ def flood_white_from_edges(im: Image.Image, threshold: int = 248) -> Image.Image
     return im
 
 
-def trim(path: Path, pad: int = 8) -> None:
-    im = Image.open(path).convert("RGBA")
+def content_bbox(im: Image.Image, threshold: int = 250) -> tuple[int, int, int, int] | None:
     px = im.load()
     w, h = im.size
-    mask = Image.new("L", im.size, 0)
-    m = mask.load()
+    minx, miny, maxx, maxy = w, h, -1, -1
     for y in range(h):
         for x in range(w):
             r, g, b, a = px[x, y]
-            if a > 8 and (r < 250 or g < 250 or b < 250):
-                m[x, y] = 255
-    bbox = mask.getbbox()
-    if not bbox:
-        flood_white_from_edges(im).save(path)
-        return
+            if a > 8 and (r < threshold or g < threshold or b < threshold):
+                if x < minx:
+                    minx = x
+                if y < miny:
+                    miny = y
+                if x > maxx:
+                    maxx = x
+                if y > maxy:
+                    maxy = y
+    if maxx < 0:
+        return None
+    return minx, miny, maxx + 1, maxy + 1
+
+
+def pad_bbox(bbox: tuple[int, int, int, int], size: tuple[int, int], pad: int) -> tuple[int, int, int, int]:
     l, t, r, b = bbox
-    l = max(0, l - pad)
-    t = max(0, t - pad)
-    r = min(im.width, r + pad)
-    b = min(im.height, b + pad)
-    flood_white_from_edges(im.crop((l, t, r, b))).save(path)
+    w, h = size
+    return max(0, l - pad), max(0, t - pad), min(w, r + pad), min(h, b + pad)
 
 
-def write(path: Path, html: str) -> None:
-    path.write_text(html, encoding="utf-8")
+def render_pdf(pdf: Path) -> Image.Image:
+    TMP.mkdir(parents=True, exist_ok=True)
+    prefix = TMP / "frame"
+    for old in TMP.glob("frame*.png"):
+        old.unlink()
+    cmd = ["pdftocairo", "-png", "-r", str(DPI), str(pdf), str(prefix)]
+    subprocess.run(cmd, check=True)
+    pages = sorted(TMP.glob("frame*.png"))
+    if not pages:
+        raise SystemExit("pdftocairo did not write a PNG")
+    return Image.open(pages[0]).convert("RGBA")
+
+
+def split_lockup(lock: Image.Image) -> tuple[Image.Image, Image.Image]:
+    """Circle on top, wordmark below — from the designer vertical lockup."""
+    w, h = lock.size
+    px = lock.load()
+    # rows with ink
+    ink_rows = []
+    for y in range(h):
+        n = 0
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a > 8 and (r < 250 or g < 250 or b < 250):
+                n += 1
+        if n > 12:
+            ink_rows.append(y)
+    if not ink_rows:
+        raise SystemExit("empty lockup")
+    # gap between emblem and title
+    gap_y = None
+    for i in range(1, len(ink_rows)):
+        if ink_rows[i] - ink_rows[i - 1] > 40:
+            gap_y = (ink_rows[i - 1] + ink_rows[i]) // 2
+            break
+    if gap_y is None:
+        gap_y = int(h * 0.62)
+    emblem = lock.crop((0, 0, w, gap_y))
+    word = lock.crop((0, gap_y, w, h))
+    eb = content_bbox(emblem)
+    wb = content_bbox(word)
+    if not eb or not wb:
+        raise SystemExit("could not split emblem/wordmark")
+    emblem = emblem.crop(pad_bbox(eb, emblem.size, 2))
+    word = word.crop(pad_bbox(wb, word.size, 2))
+    return emblem, word
+
+
+def make_row(icon: Image.Image, word: Image.Image) -> Image.Image:
+    """Horizontal lockup: circular mark + designer wordmark."""
+    target_h = max(word.height, 120)
+    scale = target_h / icon.height
+    iw = max(1, int(icon.width * scale))
+    ih = max(1, int(icon.height * scale))
+    icon_s = icon.resize((iw, ih), Image.Resampling.LANCZOS)
+    gap = max(18, int(ih * 0.12))
+    canvas = Image.new("RGBA", (iw + gap + word.width, max(ih, word.height)), (255, 255, 255, 0))
+    canvas.paste(icon_s, (0, (canvas.height - ih) // 2), icon_s)
+    canvas.paste(word, (iw + gap, (canvas.height - word.height) // 2), word)
+    return canvas
 
 
 def main() -> int:
-    TMP.mkdir(parents=True, exist_ok=True)
+    src = SOURCE_PDF
+    if not src.exists():
+        raise SystemExit(f"Нет {src}. Положите векторный файл дизайнера как brand/logo-source.pdf")
+    page = render_pdf(src)
+    bbox = content_bbox(page)
+    if not bbox:
+        raise SystemExit("designer PDF looks empty")
+    lock = page.crop(pad_bbox(bbox, page.size, 8))
+    emblem, word = split_lockup(lock)
+
+    icon = flood_white_from_edges(emblem)
+    ib = content_bbox(icon)
+    if ib:
+        icon = icon.crop(pad_bbox(ib, icon.size, 2))
+    stack = flood_white_from_edges(lock)
+    sb = content_bbox(stack)
+    if sb:
+        stack = stack.crop(pad_bbox(sb, stack.size, 4))
+    row = make_row(icon, flood_white_from_edges(word))
+
     BRAND_DIR.mkdir(parents=True, exist_ok=True)
-    icon_svg = LOGO_ICON_SVG.read_text(encoding="utf-8")
-    write(
-        TMP / "icon.html",
-        f"""<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>html,body{{margin:0;background:#fff}}svg{{display:block;width:640px;height:640px;margin:40px}}</style>
-</head><body>{icon_svg}</body></html>""",
-    )
-    chrome_shot(TMP / "icon.html", LOGO_ICON_PNG, 720, 720)
-    trim(LOGO_ICON_PNG, 2)
-
-    icon_uri = LOGO_ICON_PNG.resolve().as_uri()
-    teal = hex_of(TEAL_DARK)
-    write(
-        TMP / "row.html",
-        f"""<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>
-html,body{{margin:0;background:#fff}}
-.row{{display:flex;align-items:center;gap:26px;padding:28px 36px;width:1180px;font-family:{FONT}}}
-img{{width:176px;height:176px}}
-h1{{margin:0 0 10px;font-size:44px;letter-spacing:.12em;color:{teal};font-weight:700}}
-p{{margin:0;font-size:18px;color:{TAG_GRAY};font-weight:400}}
-</style></head><body>
-<div class="row"><img src="{icon_uri}" alt=""><div><h1>АНГЛИЙСКИЙ МАЯК</h1><p>подготовка к ОГЭ и ЕГЭ по английскому</p></div></div>
-</body></html>""",
-    )
-    chrome_shot(TMP / "row.html", LOGO_ROW_PNG, 1280, 260)
-    trim(LOGO_ROW_PNG, 6)
-
-    write(
-        TMP / "stack.html",
-        f"""<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>
-html,body{{margin:0;background:#fff}}
-.stack{{width:720px;padding:36px 28px 40px;text-align:center;font-family:{FONT}}}
-img{{width:228px;height:228px;display:block;margin:0 auto}}
-h1{{margin:22px 0 10px;font-size:36px;letter-spacing:.14em;color:{teal};font-weight:700}}
-p{{margin:0;font-size:17px;color:{TAG_GRAY};font-weight:400}}
-</style></head><body>
-<div class="stack"><img src="{icon_uri}" alt=""><h1>АНГЛИЙСКИЙ МАЯК</h1><p>подготовка к ОГЭ и ЕГЭ по английскому</p></div>
-</body></html>""",
-    )
-    chrome_shot(TMP / "stack.html", LOGO_STACK_PNG, 780, 480)
-    trim(LOGO_STACK_PNG, 6)
-
+    icon.save(LOGO_ICON_PNG)
+    row.save(LOGO_ROW_PNG)
+    stack.save(LOGO_STACK_PNG)
     for p in (LOGO_ICON_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG):
         print(f"OK  {p.relative_to(p.parents[1])}  {Image.open(p).size}  {p.stat().st_size} bytes")
     return 0
