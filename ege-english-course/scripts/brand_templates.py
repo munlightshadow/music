@@ -61,7 +61,7 @@ def write_pdf_template() -> Path:
       <img src="{stack}" alt="{NAME}" style="height:140px;width:auto">
     </div>
     <h1>Шаблон документа</h1>
-    <p>Так выглядят PDF курса «{NAME}»: цветной логотип в шапке каждой страницы,
+    <p>Так выглядят PDF курса «{NAME}»: в шапке светлый кадр (светлый круг вокруг маяка),
     золотая линия под ним, заголовки цветом бренда, подвал с круглой маркой.</p>
     <h2>Когда копировать этот файл</h2>
     <p>Дублируйте <code>brand/шаблон-документа.pdf</code>, только если нужен пустой макет.
@@ -84,8 +84,8 @@ def write_pdf_template() -> Path:
     <p style="color:#70787C">{NAME} · {TAGLINE} · {COURSE}</p>
     <p><img src="{icon}" alt="" style="height:48px;width:auto;margin-right:10px">
        <img src="{row}" alt="{NAME}" style="height:48px;width:auto"></p>
-    <h2>Frame 4 — тёмный кадр</h2>
-    <p>На чёрном и очень тёмном фоне ставим ночной диск и бирюзовый набор.
+    <h2>Тёмный кадр</h2>
+    <p>Тёмный кадр — тёмный круг вокруг маяка. На чёрном ставим диск и набор.
     На слайдах цвета <code>#214149</code> — только диск, без строки названия.</p>
     <div style="background:#0A0A0A;padding:28px 16px;text-align:center;margin:12px 0 0">
       <img src="{stack4}" alt="{NAME}" style="height:150px;width:auto">

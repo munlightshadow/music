@@ -33,11 +33,13 @@ TAGLINE = "подготовка к ОГЭ и ЕГЭ по английскому"
 COURSE = "Курс подготовки к ЕГЭ по английскому"
 
 LOGO_SOURCE_PDF = BRAND_DIR / "logo-source.pdf"
-LOGO_FRAME5_PDF = BRAND_DIR / "logo-frame5.pdf"
+LOGO_FRAME_LIGHT_PDF = BRAND_DIR / "logo-frame-light.pdf"
+LOGO_FRAME_DARK_PDF = BRAND_DIR / "logo-frame-dark.pdf"
+LOGO_FRAME5_PDF = LOGO_FRAME_LIGHT_PDF  # светлый круг
 LOGO_ICON_PNG = BRAND_DIR / "logo-icon.png"
 LOGO_ROW_PNG = BRAND_DIR / "logo-row.png"
 LOGO_STACK_PNG = BRAND_DIR / "logo-stack.png"
-# Frame 4 — тёмный кадр (ночной диск + бирюзовый логотип).
+# Тёмный кадр — тёмный круг вокруг маяка.
 LOGO_ICON_ON_DARK_PNG = BRAND_DIR / "logo-icon-on-dark.png"
 LOGO_ROW_ON_DARK_PNG = BRAND_DIR / "logo-row-on-dark.png"
 LOGO_STACK_ON_DARK_PNG = BRAND_DIR / "logo-stack-on-dark.png"
