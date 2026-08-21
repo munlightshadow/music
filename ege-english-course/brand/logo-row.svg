@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 200" role="img" aria-label="Английский Маяк">
   <image href="logo-icon.svg" x="0" y="10" width="180" height="180"/>
-  <text x="200" y="92" font-family="Liberation Sans, Noto Sans, Arial, sans-serif" font-size="42" font-weight="700" fill="#214149" letter-spacing="1.2">АНГЛИЙСКИЙ МАЯК</text>
-  <text x="200" y="132" font-family="Liberation Sans, Noto Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#494F55">подготовка к ОГЭ и ЕГЭ по английскому</text>
+  <text x="200" y="90" font-family="Inter, Noto Sans, Arial, sans-serif" font-size="42" font-weight="700" fill="#214149" letter-spacing="2.2">АНГЛИЙСКИЙ МАЯК</text>
+  <text x="200" y="128" font-family="Inter, Noto Sans, Arial, sans-serif" font-size="18" font-weight="400" fill="#707070">подготовка к ОГЭ и ЕГЭ по английскому</text>
 </svg>
