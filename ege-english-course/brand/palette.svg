@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 280" role="img" aria-label="0;8B@0 =3;89A:89 0O:">
+  <rect width="980" height="280" fill="#FFFFFF"/>
+  <!-- top row -->
+  <rect x="16" y="20" width="180" height="110" fill="#214149"/>
+  <text x="106" y="82" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="16" fill="#FFFFFF">#214149</text>
+  <rect x="208" y="20" width="180" height="110" fill="#A5D2DF"/>
+  <text x="298" y="82" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="16" fill="#214149">#A5D2DF</text>
+  <rect x="400" y="20" width="180" height="110" fill="#468A9D"/>
+  <text x="490" y="82" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="16" fill="#FFFFFF">#468A9D</text>
+  <rect x="592" y="20" width="180" height="110" fill="#494F55"/>
+  <text x="682" y="82" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="16" fill="#FFFFFF">#494F55</text>
+  <rect x="784" y="20" width="180" height="110" fill="#A8B2BB"/>
+  <text x="874" y="82" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="16" fill="#214149">#A8B2BB</text>
+  <!-- bottom row -->
+  <rect x="16" y="148" width="180" height="110" fill="#C19B4F"/>
+  <text x="106" y="210" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="16" fill="#FFFFFF">#C19B4F</text>
+  <rect x="208" y="148" width="180" height="110" fill="#FFFFFF" stroke="#A8B2BB" stroke-width="2"/>
+  <text x="298" y="210" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="16" fill="#494F55">#FFFFFF</text>
+  <defs>
+    <linearGradient id="goldG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C19B4F"/>
+      <stop offset="100%" stop-color="#F3D593"/>
+    </linearGradient>
+    <linearGradient id="tealG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#488DA0"/>
+      <stop offset="100%" stop-color="#1A333A"/>
+    </linearGradient>
+  </defs>
+  <rect x="400" y="148" width="180" height="110" fill="url(#goldG)"/>
+  <text x="490" y="198" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="14" fill="#214149">#C19B4F</text>
+  <text x="490" y="220" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="14" fill="#214149">#F3D593</text>
+  <rect x="592" y="148" width="180" height="110" fill="url(#tealG)"/>
+  <text x="682" y="198" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="14" fill="#FFFFFF">#488DA0</text>
+  <text x="682" y="220" text-anchor="middle" font-family="Liberation Sans, Arial, sans-serif" font-size="14" fill="#FFFFFF">#1A333A</text>
+</svg>

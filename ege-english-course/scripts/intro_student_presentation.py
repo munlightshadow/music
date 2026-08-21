@@ -21,58 +21,70 @@ CSS = r"""
 html, body { margin: 0; padding: 0; }
 body {
   font-family: "Liberation Sans", "Noto Sans", "DejaVu Sans", sans-serif;
-  color: #222;
+  color: #494F55;
   background: #fff;
 }
 .slide {
   width: 13.333in;
   height: 7.5in;
-  padding: 0.55in 0.7in 0.5in;
+  padding: 0.52in 0.7in 0.52in;
   page-break-after: always;
   position: relative;
   overflow: hidden;
   background: #fff;
 }
 .slide:last-child { page-break-after: auto; }
-.bars-top, .bars-bot {
-  position: absolute; left: 0; right: 0; height: 18px;
+.gold-top { position: absolute; left: 0; right: 0; top: 0; height: 5px; background: #C19B4F; }
+.teal-top { position: absolute; left: 0; right: 0; top: 5px; height: 7px; background: #214149; }
+.gold-bot { position: absolute; left: 0; right: 0; bottom: 7px; height: 3px; background: #C19B4F; }
+.teal-bot { position: absolute; left: 0; right: 0; bottom: 0; height: 7px; background: #214149; }
+.logo-header {
+  position: absolute; top: 0.20in; right: 0.55in; height: 0.42in; width: auto;
 }
-.bars-top { top: 0; border-top: 10px solid #0e8a8a; border-bottom: 3px solid #0e8a8a; }
-.bars-bot { bottom: 0; border-bottom: 10px solid #0e8a8a; border-top: 3px solid #0e8a8a; }
+.logo-foot {
+  position: absolute; left: 0.52in; bottom: 0.15in; height: 0.32in; width: auto;
+}
 .pg {
-  position: absolute; right: 0.55in; bottom: 0.22in;
-  font-size: 11pt; color: #7a838c;
+  position: absolute; right: 0.55in; bottom: 0.18in;
+  font-size: 11pt; color: #A8B2BB;
 }
 .kicker {
-  position: absolute; left: 0.7in; bottom: 0.22in;
-  font-size: 10pt; color: #7a838c;
+  position: absolute; left: 0.95in; bottom: 0.18in;
+  font-size: 10pt; color: #A8B2BB;
 }
 h1 {
-  font-size: 28pt; color: #0e8a8a; margin: 0 0 16px;
+  font-size: 28pt; color: #214149; margin: 0 0 16px;
   line-height: 1.15;
 }
-h2 { font-size: 20pt; color: #0e8a8a; margin: 0 0 12px; }
+h2 { font-size: 20pt; color: #468A9D; margin: 0 0 12px; }
 .cover {
   display: flex; flex-direction: column; justify-content: center;
   align-items: center; text-align: center; height: 100%;
-  padding-bottom: 0.3in;
+  padding-bottom: 0.2in;
 }
+.cover .logo-stack { height: 1.9in; width: auto; margin: 0 0 18px; }
 .cover h1 {
-  font-size: 34pt; color: #e07a2f; letter-spacing: 0.02em;
-  text-transform: uppercase; margin: 0 0 14px;
+  font-size: 30pt; color: #214149; letter-spacing: 0.04em;
+  text-transform: uppercase; margin: 0 0 10px;
 }
-.cover p { font-size: 16pt; margin: 6px 0; color: #333; }
+.cover p { font-size: 16pt; margin: 6px 0; color: #494F55; }
+.cover-slide .logo-header, .cover-slide .logo-foot { display: none; }
+.section-slide { background: #214149; color: #fff; }
+.section-slide h1 { color: #F3D593; }
+.section-slide .muted { color: #A5D2DF; }
+.section-slide .logo-header { display: none; }
+.section-slide .kicker, .section-slide .pg { color: #A5D2DF; }
 .section {
   display: flex; flex-direction: column; justify-content: center;
   height: 100%; padding-bottom: 0.25in;
 }
-.section .num { font-size: 14pt; color: #e07a2f; letter-spacing: 0.12em; text-transform: uppercase; }
+.section .num { font-size: 14pt; color: #C19B4F; letter-spacing: 0.12em; text-transform: uppercase; }
 .section h1 { font-size: 40pt; margin-top: 8px; }
 .big {
   display: flex; flex-direction: column; justify-content: center;
   align-items: center; text-align: center; height: 100%;
 }
-.big .n { font-size: 72pt; color: #0e8a8a; font-weight: 700; line-height: 1; }
+.big .n { font-size: 72pt; color: #468A9D; font-weight: 700; line-height: 1; }
 .big p { font-size: 18pt; margin: 16px 0 0; max-width: 10.5in; }
 ul { margin: 0; padding-left: 1.1em; font-size: 16pt; line-height: 1.45; }
 li { margin: 0 0 8px; }
@@ -81,9 +93,9 @@ li { margin: 0 0 8px; }
 p { font-size: 16pt; line-height: 1.4; margin: 0 0 10px; }
 pre, .kim {
   font-family: "Liberation Sans", "Noto Sans", sans-serif;
-  background: #f4f7f7;
-  border: 1px solid #cfe3e3;
-  border-left: 6px solid #0e8a8a;
+  background: #F3F7F8;
+  border: 1px solid #C5D0D4;
+  border-left: 6px solid #468A9D;
   padding: 10px 14px;
   font-size: 12pt;
   line-height: 1.35;
@@ -91,58 +103,71 @@ pre, .kim {
   margin: 0 0 10px;
 }
 .example {
-  background: #f7f7f4;
-  border: 1px solid #ddd8c8;
-  border-left: 6px solid #e07a2f;
+  background: #FBF8F1;
+  border: 1px solid #E6D7B3;
+  border-left: 6px solid #C19B4F;
   padding: 10px 14px;
   font-size: 12pt;
   line-height: 1.35;
   white-space: pre-wrap;
   margin: 0 0 8px;
 }
-.ok { border-left-color: #1b7f4e; background: #f3f8f5; }
-.bad { border-left-color: #b42318; background: #fdf4f3; }
+.ok { border-left-color: #2F6F5A; background: #f3f8f5; }
+.bad { border-left-color: #A33B32; background: #fdf4f3; }
 table { border-collapse: collapse; width: 100%; font-size: 13.5pt; margin: 6px 0 0; }
-th, td { border: 1px solid #c5d0d0; padding: 6px 8px; text-align: left; vertical-align: top; }
-th { background: #e7f3f3; color: #0e5f5f; }
+th, td { border: 1px solid #C5D0D4; padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: #E4F1F4; color: #214149; }
 .cols { display: flex; gap: 28px; }
 .cols > div { flex: 1; }
 .tag {
-  display: inline-block; background: #0e8a8a; color: #fff;
+  display: inline-block; background: #468A9D; color: #fff;
   font-size: 11pt; padding: 2px 10px; border-radius: 999px; margin-bottom: 8px;
 }
-.tag.good { background: #1b7f4e; }
-.tag.bad { background: #b42318; }
-.muted { color: #5c6570; font-size: 13pt; }
+.tag.good { background: #2F6F5A; }
+.tag.bad { background: #A33B32; }
+.muted { color: #70787C; font-size: 13pt; }
 .shots { display: flex; gap: 14px; justify-content: center; align-items: flex-start; }
 .shots img.shot {
   display: block;
   max-height: 5.45in;
   max-width: 12.1in;
   object-fit: contain;
-  border: 1px solid #c5d0d0;
+  border: 1px solid #C5D0D4;
   background: #fff;
 }
 .shots.n2 img.shot { max-width: 6.05in; max-height: 5.35in; }
-.credit { font-size: 11pt; color: #7a838c; margin: 0 0 8px; }
+.credit { font-size: 11pt; color: #A8B2BB; margin: 0 0 8px; }
 """
 
 
 def wrap(inner: str, n: int, total: int, klass: str = "") -> str:
+    extra = klass
+    if 'class="cover"' in inner:
+        extra = f"{extra} cover-slide".strip()
+    elif 'class="section"' in inner:
+        extra = f"{extra} section-slide".strip()
     return f"""
-<section class="slide {klass}">
-  <div class="bars-top"></div>
-  <div class="bars-bot"></div>
+<section class="slide {extra}">
+  <div class="gold-top"></div>
+  <div class="teal-top"></div>
+  <img class="logo-header" src="img/logo-row.png" alt="Английский Маяк">
   {inner}
-  <div class="kicker">Вводный модуль · курс подготовки к ЕГЭ</div>
+  <img class="logo-foot" src="img/logo-icon.png" alt="">
+  <div class="kicker">Английский Маяк · вводный модуль</div>
   <div class="pg">{n} / {total}</div>
+  <div class="gold-bot"></div>
+  <div class="teal-bot"></div>
 </section>
 """
 
 
 def cover(title: str, *lines: str) -> str:
     ps = "".join(f"<p>{x}</p>" for x in lines)
-    return f'<div class="cover"><h1>{title}</h1>{ps}</div>'
+    return (
+        '<div class="cover">'
+        '<img class="logo-stack" src="img/logo-stack.png" alt="Английский Маяк">'
+        f"<h1>{title}</h1>{ps}</div>"
+    )
 
 
 def section(label: str, title: str, note: str = "") -> str:
@@ -640,6 +665,10 @@ def main() -> int:
     if img_tmp.exists():
         shutil.rmtree(img_tmp)
     shutil.copytree(IMG_DIR, img_tmp)
+    from brand import LOGO_ICON_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG
+
+    for src in (LOGO_ICON_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG):
+        shutil.copy2(src, img_tmp / src.name)
     html_path = TMP / "intro.html"
     html_path.write_text(doc, encoding="utf-8")
     OUT_PDF.parent.mkdir(parents=True, exist_ok=True)

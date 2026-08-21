@@ -14,6 +14,7 @@
 | [04-intro-video](04-intro-video/slides.md) | Слайды и речь эксперта для вводного видео |
 | [05-tutor-ops](05-tutor-ops/feedback-principles.md) | Принцип фидбека и бланки проверки 37 / 38 / задания 4 |
 | [06-sources](06-sources/) | Очищенные исходные документы |
+| [brand](brand/README.md) | Логотип, палитра, шаблоны PDF и PPTX |
 | [GAPS.md](GAPS.md) | Чего ещё нет; матрица группа × класс |
 | [pdf](pdf/INDEX.pdf) | PDF-снимки всех текущих файлов; целиком — [_полный-пакет.pdf](pdf/_полный-пакет.pdf) |
 

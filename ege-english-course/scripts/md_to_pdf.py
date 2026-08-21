@@ -6,16 +6,23 @@ from __future__ import annotations
 import html
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 import markdown
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from brand import COURSE, LOGO_ICON_PNG, LOGO_ROW_PNG, LOGO_STACK_PNG, NAME, css_vars  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 PDF_DIR = ROOT / "pdf"
+TMP = Path("/tmp/ege-pdf-build")
 CHROME = os.environ.get("CHROME", "/usr/bin/google-chrome")
 CHROME_PROFILE = Path("/tmp/ege-chrome-pdf-profile")
+LOGO_ROW_URI = ""
+LOGO_ICON_URI = ""
 
 LANDSCAPE = {
     "03-curriculum/curriculum-detailed.md",
@@ -30,45 +37,67 @@ LANDSCAPE = {
 
 CSS = """
 :root {
-  --ink: #1a1a1a;
-  --muted: #555;
-  --rule: #c8c8c8;
-  --head: #f3f3f3;
-  --code-bg: #f6f6f6;
+""" + css_vars() + """
 }
 * { box-sizing: border-box; }
 html, body {
   margin: 0;
   padding: 0;
   color: var(--ink);
-  font-family: "Liberation Serif", "Noto Serif", "DejaVu Serif", "Times New Roman", serif;
+  font-family: "Liberation Sans", "Noto Sans", "DejaVu Sans", sans-serif;
   font-size: 11pt;
   line-height: 1.45;
 }
-.page {
-  padding: 0;
+.page { padding: 0; }
+.sheet { width: 100%; border-collapse: collapse; }
+.sheet td { border: 0; padding: 0; vertical-align: top; }
+.brand-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 8px;
+  margin: 0 0 14px;
+  border-bottom: 3px solid var(--gold);
 }
-.banner {
-  font-family: "Liberation Sans", "Noto Sans", "DejaVu Sans", sans-serif;
-  font-size: 8.5pt;
+.brand-banner img.mark { height: 38px; width: auto; }
+.brand-banner img.row { height: 42px; width: auto; max-width: 280px; }
+.brand-banner .meta { margin-left: auto; text-align: right; }
+.brand-banner .name {
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--teal-dark);
+  letter-spacing: 0.04em;
+}
+.brand-banner .tag {
+  font-size: 8pt;
   color: var(--muted);
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 8px;
-  margin-bottom: 16px;
 }
-.banner .src { word-break: break-all; }
+.brand-banner .src { font-size: 7.5pt; color: var(--muted); word-break: break-all; margin-top: 2px; }
+.brand-foot {
+  border-top: 2px solid var(--teal);
+  margin-top: 16px;
+  padding-top: 6px;
+  font-size: 8pt;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.brand-foot img.mark { height: 22px; width: auto; }
 h1, h2, h3, h4 {
   font-family: "Liberation Sans", "Noto Sans", "DejaVu Sans", sans-serif;
   line-height: 1.25;
   page-break-after: avoid;
+  color: var(--teal-dark);
 }
 h1 { font-size: 20pt; margin: 0 0 14px; }
-h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--rule); padding-bottom: 3px; }
-h3 { font-size: 12pt; margin: 16px 0 6px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 2px solid var(--gold); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; color: var(--teal); }
 h4 { font-size: 11pt; margin: 12px 0 4px; }
 p, ul, ol { margin: 0 0 8px; }
 li { margin: 0 0 3px; }
-a { color: inherit; text-decoration: underline; }
+a { color: var(--teal); text-decoration: underline; }
 code, pre, .yaml, .mermaid {
   font-family: "JetBrains Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
 }
@@ -112,7 +141,7 @@ table {
 thead { display: table-header-group; }
 tr { page-break-inside: avoid; }
 th, td {
-  border: 1px solid #bbb;
+  border: 1px solid var(--rule);
   padding: 4px 6px;
   vertical-align: top;
   text-align: left;
@@ -121,12 +150,22 @@ th {
   background: var(--head);
   font-family: "Liberation Sans", "Noto Sans", "DejaVu Sans", sans-serif;
   font-weight: 600;
+  color: var(--teal-dark);
 }
 blockquote {
   margin: 0 0 10px;
   padding: 4px 0 4px 12px;
-  border-left: 3px solid #888;
-  color: #333;
+  border-left: 3px solid var(--gold);
+  color: var(--ink);
+}
+.swatch {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 6px;
+  border: 1px solid var(--rule);
 }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 16px 0; }
 .doc-break { page-break-before: always; }
@@ -152,7 +191,7 @@ def collect_sources() -> list[Path]:
         if not path.is_file():
             continue
         rel = relativize(path)
-        if rel.startswith("pdf/") or rel.startswith("scripts/"):
+        if rel.startswith("pdf/") or rel.startswith("scripts/") or rel.startswith("brand/"):
             continue
         if path.suffix.lower() in {".md", ".yaml", ".yml"}:
             files.append(path)
@@ -178,6 +217,40 @@ def md_to_html_body(text: str) -> str:
     )
 
 
+def prepare_assets(tmp: Path) -> None:
+    """Copy PNG lockups next to generated HTML so Chrome can embed them."""
+    global LOGO_ROW_URI, LOGO_ICON_URI
+    tmp.mkdir(parents=True, exist_ok=True)
+    for src in (LOGO_ROW_PNG, LOGO_ICON_PNG, LOGO_STACK_PNG):
+        if not src.exists():
+            raise FileNotFoundError(
+                f"Нет {src.name}. Сначала: python3 ege-english-course/scripts/export_brand_assets.py"
+            )
+        shutil.copy2(src, tmp / src.name)
+    LOGO_ROW_URI = (tmp / LOGO_ROW_PNG.name).resolve().as_uri()
+    LOGO_ICON_URI = (tmp / LOGO_ICON_PNG.name).resolve().as_uri()
+
+
+def brand_banner(source: str) -> str:
+    return f"""
+      <div class="brand-banner">
+        <img class="row" src="{LOGO_ROW_URI}" alt="{html.escape(NAME)}">
+        <div class="meta">
+          <div class="src">{html.escape(source)}</div>
+        </div>
+      </div>
+    """
+
+
+def brand_footer() -> str:
+    return f"""
+      <div class="brand-foot">
+        <span>{html.escape(NAME)} · {html.escape(COURSE)}</span>
+        <img class="mark" src="{LOGO_ICON_URI}" alt="" style="height:22px;width:auto">
+      </div>
+    """
+
+
 def wrap_document(title: str, source: str, body: str, landscape: bool) -> str:
     klass = "landscape" if landscape else "portrait"
     css = CSS_LANDSCAPE if landscape else CSS
@@ -189,13 +262,13 @@ def wrap_document(title: str, source: str, body: str, landscape: bool) -> str:
   <style>{css}</style>
 </head>
 <body class="{klass}">
-  <div class="page">
-    <div class="banner">
-      Курс подготовки к ЕГЭ по английскому · PDF-снимок исходника
-      <div class="src">{html.escape(source)}</div>
-    </div>
-    {body}
-  </div>
+  <table class="sheet">
+    <thead><tr><td>{brand_banner(source)}</td></tr></thead>
+    <tbody><tr><td>
+      <div class="page">{body}</div>
+    </td></tr></tbody>
+    <tfoot><tr><td>{brand_footer()}</td></tr></tfoot>
+  </table>
 </body>
 </html>
 """
@@ -239,6 +312,7 @@ def chrome_pdf(html_path: Path, pdf_path: Path) -> None:
         "--no-first-run",
         "--no-default-browser-check",
         "--no-pdf-header-footer",
+        "--allow-file-access-from-files",
         f"--user-data-dir={CHROME_PROFILE}",
         f"--print-to-pdf={pdf_path}",
         html_path.resolve().as_uri(),
@@ -275,9 +349,33 @@ def write_index(items: list[tuple[str, str]]) -> str:
     return wrap_document("PDF-версии файлов курса", "pdf/INDEX.pdf", body, False)
 
 
+def page_fragment(html_doc: str) -> str:
+    inner = re.search(
+        r'<div class="page">(.*)</div>\s*</td>\s*</tr>\s*</tbody>',
+        html_doc,
+        re.S,
+    )
+    if inner:
+        return inner.group(1)
+    inner = re.search(r'<div class="page">(.*)</div>', html_doc, re.S)
+    return inner.group(1) if inner else html_doc
+
+
+def branded_section(source: str, fragment: str, landscape: bool) -> str:
+    klass = "landscape" if landscape else "portrait"
+    return (
+        f'<section class="doc-break {klass}">'
+        '<table class="sheet">'
+        f"<thead><tr><td>{brand_banner(source)}</td></tr></thead>"
+        f'<tbody><tr><td><div class="page">{fragment}</div></td></tr></tbody>'
+        f"<tfoot><tr><td>{brand_footer()}</td></tr></tfoot>"
+        "</table></section>"
+    )
+
+
 def main() -> int:
-    tmp = Path("/tmp/ege-pdf-build")
-    tmp.mkdir(exist_ok=True)
+    tmp = TMP
+    prepare_assets(tmp)
     sources = collect_sources()
     if not sources:
         print("No sources found", file=sys.stderr)
@@ -299,13 +397,7 @@ def main() -> int:
             print(f"WARN small pdf: {pdf_rel} ({size} bytes)", file=sys.stderr)
         print(f"OK  {pdf_rel}  ({size} bytes)")
         index_items.append((rel, title))
-        klass = "landscape" if landscape else "portrait"
-        # Keep only inner page for combined file; re-wrap later.
-        inner = re.search(r'<div class="page">(.*)</div>\s*</body>', html_doc, re.S)
-        fragment = inner.group(1) if inner else html_doc
-        combined_parts.append(
-            f'<section class="doc-break {klass}"><div class="page">{fragment}</div></section>'
-        )
+        combined_parts.append(branded_section(rel, page_fragment(html_doc), landscape))
 
     index_html = write_index(index_items)
     index_path = tmp / "INDEX.html"

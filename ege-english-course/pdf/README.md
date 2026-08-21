@@ -28,3 +28,13 @@ python3 ege-english-course/scripts/md_to_pdf.py
 ```
 
 Нужен Google Chrome (headless).
+
+Шаблоны с логотипом и палитрой бренда — в [`../brand/`](../brand/README.md):
+
+- [шаблон-документа.pdf](../brand/шаблон-документа.pdf)
+- [шаблон-презентации.pptx](../brand/шаблон-презентации.pptx)
+
+```bash
+python3 ege-english-course/scripts/export_brand_assets.py
+python3 ege-english-course/scripts/brand_templates.py
+```

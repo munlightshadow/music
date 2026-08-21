@@ -20,28 +20,41 @@ from lxml import etree
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from intro_student_presentation import slides, IMG_DIR  # noqa: E402
+from brand import (  # noqa: E402
+    TEAL,
+    TEAL_DARK,
+    GOLD,
+    GOLD_LIGHT,
+    CHARCOAL,
+    STEEL,
+    WHITE,
+    SKY,
+    KIM_BG,
+    TH_BG,
+    BORDER,
+    OK,
+    BAD,
+    LOGO_ICON_PNG,
+    LOGO_ROW_PNG,
+    LOGO_STACK_PNG,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_STUDENT = ROOT / "03-curriculum" / "intro-student" / "вводный-модуль.pptx"
 OUT_PDF_DIR = ROOT / "pdf" / "03-curriculum" / "intro-student"
+TEMPLATE_OUT = ROOT / "brand" / "шаблон-презентации.pptx"
 
 W, H = 13.333, 7.5
-TEAL = (14, 138, 138)
-TEAL_DARK = (14, 95, 95)
-ORANGE = (224, 122, 47)
-DARK = (34, 34, 34)
-MUTED = (92, 101, 112)
-PAGE = (122, 131, 140)
-WHITE = (255, 255, 255)
-GOOD = (27, 127, 78)
-BAD = (180, 35, 24)
-KIM_BG = (244, 247, 247)
+DARK = CHARCOAL
+MUTED = (0x70, 0x78, 0x7C)
+PAGE = STEEL
+GOOD = OK
+ORANGE = GOLD
+TEAL_MID = TEAL
 OK_BG = (243, 248, 245)
 BAD_BG = (253, 244, 243)
-EX_BG = (247, 247, 244)
-TH_BG = (231, 243, 243)
+EX_BG = (251, 248, 241)
 ROW_BG = (250, 252, 252)
-BORDER = (197, 208, 208)
 
 
 def rgb(t):
@@ -94,16 +107,45 @@ def add_box(slide, x, y, w, h, fill, accent):
     add_rect(slide, x, y, 0.07, h, accent)
 
 
-def deco_bars(slide):
-    add_rect(slide, 0, 0, W, 0.10, TEAL)
-    add_rect(slide, 0, 0.145, W, 0.032, TEAL)
-    add_rect(slide, 0, H - 0.10, W, 0.10, TEAL)
-    add_rect(slide, 0, H - 0.177, W, 0.032, TEAL)
+def deco_bars(slide, dark=False):
+    add_rect(slide, 0, 0, W, 0.045, GOLD)
+    add_rect(slide, 0, 0.045, W, 0.07, TEAL_DARK if not dark else GOLD)
+    add_rect(slide, 0, H - 0.07, W, 0.07, TEAL_DARK)
+    add_rect(slide, 0, H - 0.10, W, 0.03, GOLD)
 
 
-def footer(slide, n, total):
-    add_text(slide, 0.70, H - 0.42, 9.6, 0.24, "Вводный модуль · курс подготовки к ЕГЭ", 10, PAGE)
-    add_text(slide, W - 1.85, H - 0.42, 1.15, 0.24, f"{n} / {total}", 11, PAGE, align=PP_ALIGN.RIGHT)
+def add_logo_row(slide, x=10.35, y=0.16, h=0.42):
+    if not LOGO_ROW_PNG.exists():
+        return
+    from PIL import Image as PILImage
+
+    with PILImage.open(LOGO_ROW_PNG) as im:
+        aspect = im.width / im.height if im.height else 3.6
+    slide.shapes.add_picture(str(LOGO_ROW_PNG), Inches(x), Inches(y), Inches(h * aspect), Inches(h))
+
+
+def add_logo_icon(slide, x=0.52, y=H - 0.46, h=0.32):
+    if not LOGO_ICON_PNG.exists():
+        return
+    slide.shapes.add_picture(str(LOGO_ICON_PNG), Inches(x), Inches(y), Inches(h), Inches(h))
+
+
+def add_logo_stack(slide, y=0.55, h=1.85):
+    if not LOGO_STACK_PNG.exists():
+        return
+    from PIL import Image as PILImage
+
+    with PILImage.open(LOGO_STACK_PNG) as im:
+        aspect = im.width / im.height if im.height else 1.35
+    w = h * aspect
+    slide.shapes.add_picture(str(LOGO_STACK_PNG), Inches((W - w) / 2), Inches(y), Inches(w), Inches(h))
+
+
+def footer(slide, n, total, dark=False):
+    add_logo_icon(slide)
+    color = SKY if dark else PAGE
+    add_text(slide, 0.95, H - 0.42, 9.2, 0.24, "Английский Маяк · вводный модуль", 10, color)
+    add_text(slide, W - 1.85, H - 0.42, 1.15, 0.24, f"{n} / {total}", 11, color, align=PP_ALIGN.RIGHT)
 
 
 def add_text(
@@ -268,9 +310,10 @@ def _col_shares(headers, n):
 
 def cover_slide(slide, root, n, total):
     deco_bars(slide)
+    add_logo_stack(slide, y=0.45, h=1.7)
     h1 = root.find(".//h1")
     ps = root.findall(".//p")
-    add_text(slide, 0.9, 2.15, 11.5, 1.3, node_text(h1).upper(), 34, ORANGE, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    add_text(slide, 0.9, 2.35, 11.5, 1.15, node_text(h1).upper(), 30, TEAL_DARK, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
     y = 3.55
     for p in ps:
         add_text(slide, 1.2, y, 10.9, 0.55, node_text(p), 16, DARK, align=PP_ALIGN.CENTER)
@@ -279,20 +322,23 @@ def cover_slide(slide, root, n, total):
 
 
 def section_slide(slide, root, n, total):
-    deco_bars(slide)
+    add_rect(slide, 0, 0, W, H, TEAL_DARK)
+    deco_bars(slide, dark=True)
+    add_logo_icon(slide, x=W - 0.95, y=0.22, h=0.42)
     num = root.find(".//div[@class='num']")
     h1 = root.find(".//h1")
     muted = root.find(".//p")
     title = "\n".join(t.strip() for t in node_multiline(h1).splitlines() if t.strip())
-    add_text(slide, 0.85, 2.15, 11.6, 0.4, node_text(num).upper(), 14, ORANGE, True)
-    add_text(slide, 0.85, 2.55, 11.6, 1.8, title, 36, TEAL, True)
+    add_text(slide, 0.85, 2.15, 11.6, 0.4, node_text(num).upper(), 14, GOLD, True)
+    add_text(slide, 0.85, 2.55, 11.6, 1.8, title, 36, GOLD_LIGHT, True)
     if muted is not None and node_text(muted):
-        add_text(slide, 0.85, 4.55, 11.6, 0.8, node_text(muted), 16, MUTED)
-    footer(slide, n, total)
+        add_text(slide, 0.85, 4.55, 11.6, 0.8, node_text(muted), 16, SKY)
+    footer(slide, n, total, dark=True)
 
 
 def big_slide(slide, root, n, total):
     deco_bars(slide)
+    add_logo_row(slide)
     number = node_text(root.find(".//div[@class='n']"))
     caption = node_multiline(root.find(".//p"))
     add_text(slide, 0.7, 1.85, 12.0, 1.6, number, 68, TEAL, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
@@ -302,12 +348,13 @@ def big_slide(slide, root, n, total):
 
 def content_slide(slide, root, n, total):
     deco_bars(slide)
+    add_logo_row(slide)
     h1 = root.find("./h1")
     body = root.find("./div")
     small = body is not None and (body.get("class") or "") == "small"
     title = node_text(h1)
     title_size = 22 if small or len(title) > 48 else 26
-    add_text(slide, 0.70, 0.32, 12.0, 0.72 if len(title) > 42 else 0.55, title, title_size, TEAL, True)
+    add_text(slide, 0.70, 0.32, 9.4, 0.72 if len(title) > 42 else 0.55, title, title_size, TEAL_DARK, True)
 
     y = 1.05 if len(title) > 42 else 0.95
     bottom = 6.95
@@ -582,12 +629,117 @@ def build(path: Path) -> int:
     return total
 
 
+def write_pptx_template(path: Path | None = None) -> Path:
+    """Blank branded deck: title, section, content, two columns, callout, table."""
+    path = path or TEMPLATE_OUT
+    prs = Presentation()
+    prs.slide_width = Inches(W)
+    prs.slide_height = Inches(H)
+    blank = prs.slide_layouts[6]
+    total = 6
+
+    # 1. Title
+    s = prs.slides.add_slide(blank)
+    add_rect(s, 0, 0, W, H, WHITE)
+    deco_bars(s)
+    add_logo_stack(s, y=0.55, h=1.85)
+    add_text(s, 0.9, 2.55, 11.5, 0.9, "Название презентации", 32, TEAL_DARK, True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    add_text(s, 1.4, 3.5, 10.5, 0.5, "Подзаголовок · модуль, занятие или встреча", 16, CHARCOAL, align=PP_ALIGN.CENTER)
+    add_text(s, 1.4, 4.15, 10.5, 0.4, "Английский Маяк · подготовка к ОГЭ и ЕГЭ по английскому", 14, TEAL, align=PP_ALIGN.CENTER)
+    footer(s, 1, total)
+
+    # 2. Section
+    s = prs.slides.add_slide(blank)
+    add_rect(s, 0, 0, W, H, TEAL_DARK)
+    deco_bars(s, dark=True)
+    add_logo_icon(s, x=W - 0.95, y=0.22, h=0.42)
+    add_text(s, 0.85, 2.15, 11.6, 0.4, "ЧАСТЬ 1", 14, GOLD, True)
+    add_text(s, 0.85, 2.55, 11.6, 1.6, "Название раздела", 40, GOLD_LIGHT, True)
+    add_text(s, 0.85, 4.4, 11.6, 0.7, "Короткое пояснение, о чём этот блок", 16, SKY)
+    footer(s, 2, total, dark=True)
+
+    # 3. Content
+    s = prs.slides.add_slide(blank)
+    add_rect(s, 0, 0, W, H, WHITE)
+    deco_bars(s)
+    add_logo_row(s)
+    add_text(s, 0.70, 0.32, 9.4, 0.55, "Заголовок слайда", 26, TEAL_DARK, True)
+    bullets = [
+        "Первый тезис — коротко и по делу.",
+        "Второй тезис — один факт или правило.",
+        "Третий тезис — что сделать ученику.",
+        "Четвёртый тезис — ссылка на задание или модуль.",
+    ]
+    y = 1.15
+    for line in bullets:
+        add_rect(s, 0.70, y + 0.12, 0.14, 0.14, GOLD)
+        add_text(s, 1.05, y, 11.4, 0.42, line, 18, CHARCOAL)
+        y += 0.55
+    footer(s, 3, total)
+
+    # 4. Two columns
+    s = prs.slides.add_slide(blank)
+    add_rect(s, 0, 0, W, H, WHITE)
+    deco_bars(s)
+    add_logo_row(s)
+    add_text(s, 0.70, 0.32, 9.4, 0.55, "Две колонки", 26, TEAL_DARK, True)
+    add_box(s, 0.70, 1.15, 5.7, 5.15, KIM_BG, TEAL)
+    add_box(s, 6.90, 1.15, 5.7, 5.15, EX_BG, GOLD)
+    add_text(s, 1.00, 1.35, 5.2, 0.4, "Слева", 18, TEAL, True)
+    add_text(s, 1.00, 1.85, 5.2, 4.1, "Правило, критерий или шаг.\nОставьте место под 3–5 строк.", 16, CHARCOAL)
+    add_text(s, 7.20, 1.35, 5.2, 0.4, "Справа", 18, GOLD, True)
+    add_text(s, 7.20, 1.85, 5.2, 4.1, "Пример, цитата из КИМ или подсказка тьютору.", 16, CHARCOAL)
+    footer(s, 4, total)
+
+    # 5. Callout
+    s = prs.slides.add_slide(blank)
+    add_rect(s, 0, 0, W, H, WHITE)
+    deco_bars(s)
+    add_logo_row(s)
+    add_text(s, 0.70, 0.32, 9.4, 0.55, "Акцент", 26, TEAL_DARK, True)
+    add_box(s, 0.70, 1.2, 11.9, 2.2, EX_BG, GOLD)
+    add_text(s, 1.05, 1.4, 11.3, 0.4, "Подсказка тьютору", 16, GOLD, True)
+    add_text(s, 1.05, 1.9, 11.3, 1.2, "Сюда — то, что нельзя пропустить: критерий, объём, типичная ошибка.", 18, CHARCOAL)
+    add_box(s, 0.70, 3.65, 11.9, 2.5, KIM_BG, TEAL)
+    add_text(s, 1.05, 3.85, 11.3, 0.4, "Формулировка как в КИМ", 16, TEAL, True)
+    add_text(s, 1.05, 4.35, 11.3, 1.5, "Скопируйте сюда фразу из демоверсии или задания модуля.", 18, CHARCOAL)
+    footer(s, 5, total)
+
+    # 6. Table
+    s = prs.slides.add_slide(blank)
+    add_rect(s, 0, 0, W, H, WHITE)
+    deco_bars(s)
+    add_logo_row(s)
+    add_text(s, 0.70, 0.32, 9.4, 0.55, "Таблица", 26, TEAL_DARK, True)
+    add_table(
+        s,
+        0.70,
+        1.15,
+        11.9,
+        4.6,
+        ["Колонка 1", "Колонка 2", "Колонка 3"],
+        [
+            ["Критерий", "Максимум", "Что смотрим"],
+            ["РКЗ", "3", "Полнота ответа"],
+            ["Организация", "2", "Абзацы и связность"],
+            ["Язык", "3", "Только пройденное"],
+        ],
+    )
+    footer(s, 6, total)
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    prs.save(str(path))
+    return path
+
+
 def main():
     n = build(OUT_STUDENT)
     OUT_PDF_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copy2(OUT_STUDENT, OUT_PDF_DIR / OUT_STUDENT.name)
+    tpl = write_pptx_template()
     print(f"OK  {OUT_STUDENT.relative_to(ROOT)}  ({n} slides)")
     print(f"OK  {(OUT_PDF_DIR / OUT_STUDENT.name).relative_to(ROOT)}")
+    print(f"OK  {tpl.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
