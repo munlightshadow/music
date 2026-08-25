@@ -1,0 +1,33 @@
+/* Памятка «Английский маяк»: палитра и шрифты */
+:root {
+  --am-dark-teal: #214149;
+  --am-light-pastel-blue: #a5d2df;
+  --am-medium-teal: #468a9d;
+  --am-charcoal: #494f55;
+  --am-steel: #a8b2bb;
+  --am-muted-gold: #c19b4f;
+  --am-white: #ffffff;
+  --am-gold-light: #f3d593;
+  --am-teal-horizon: #488da0;
+  --am-teal-deep: #1a333a;
+
+  --am-gradient-gold: linear-gradient(180deg, #c19b4f 0%, #f3d593 100%);
+  --am-gradient-sea: linear-gradient(180deg, #488da0 0%, #1a333a 100%);
+
+  --am-font-title: "Sofia Sans Condensed", sans-serif;
+  --am-font-title-weight: 800;
+  --am-font-body: "Open Sans", sans-serif;
+  --am-font-body-weight: 400;
+}
+
+.am-title {
+  font-family: var(--am-font-title);
+  font-weight: var(--am-font-title-weight);
+  color: var(--am-white);
+}
+
+.am-body {
+  font-family: var(--am-font-body);
+  font-weight: var(--am-font-body-weight);
+  color: var(--am-white);
+}

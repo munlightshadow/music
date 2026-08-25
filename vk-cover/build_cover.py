@@ -1,0 +1,676 @@
+#!/usr/bin/env python3
+"""Build the brand memo, palette board, and the 1920x768 VK community cover."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+
+ROOT = Path(__file__).resolve().parent
+LOGO_EMBLEM = ROOT / "assets" / "logo-emblem.png"
+LAYERED_LIGHTHOUSE = ROOT / "assets" / "logo-lighthouse-layered.png"
+SEA_SOURCE = ROOT / "assets" / "sea-source.png"
+ASSETS_LIGHTHOUSE = Path("/opt/cursor/artifacts/assets/vk-cover-sea-lighthouse.png")
+FALLBACK_LIGHTHOUSE = Path("/tmp/lighthouse-extract.png")
+FONTS = ROOT / "fonts"
+FONT_TITLE = str(FONTS / "SofiaSansCondensed.ttf")
+FONT_BODY = str(FONTS / "OpenSans.ttf")
+
+W, H = 1920, 768
+TITLE_TEXT = "АНГЛИЙСКИЙ МАЯК"
+SUBTITLE_TEXT = "подготовка к ОГЭ и ЕГЭ по английскому языку"
+
+
+def hex_to_rgb(value: str) -> tuple[int, int, int]:
+    v = value.lstrip("#")
+    return int(v[0:2], 16), int(v[2:4], 16), int(v[4:6], 16)
+
+
+PALETTE = json.loads((ROOT / "palette.json").read_text(encoding="utf-8"))
+C = {key: hex_to_rgb(item["hex"]) for key, item in PALETTE["colors"].items()}
+
+
+def lerp(a, b, t):
+    t = np.clip(t, 0.0, 1.0)
+    return (1.0 - t) * np.asarray(a, dtype=np.float32) + t * np.asarray(b, dtype=np.float32)
+
+
+def load_font(path: str, size: int, variation: str) -> ImageFont.FreeTypeFont:
+    font = ImageFont.truetype(path, size)
+    font.set_variation_by_name(variation)
+    return font
+
+
+def ink_width(font: ImageFont.FreeTypeFont, text: str) -> int:
+    b = font.getbbox(text)
+    return b[2] - b[0]
+
+
+def centered_x(cx: float, font: ImageFont.FreeTypeFont, text: str) -> int:
+    """X so the visual ink of `text` is centered on cx."""
+    b = font.getbbox(text)
+    return int(round(cx - (b[0] + b[2]) / 2))
+
+
+def build_palette_board() -> Image.Image:
+    cols, rows = 5, 2
+    sw, sh = 280, 200
+    pad, gap = 36, 20
+    board_w = pad * 2 + cols * sw + (cols - 1) * gap
+    board_h = pad * 2 + rows * sh + gap + 72
+    img = Image.new("RGB", (board_w, board_h), C["teal_deep"])
+    draw = ImageDraw.Draw(img)
+    label_font = load_font(FONT_BODY, 20, "Regular")
+    title_font = load_font(FONT_TITLE, 32, "Bold")
+
+    draw.text((pad, 16), "Английский маяк — палитра логотипа", font=title_font, fill=C["white"])
+
+    swatches = [
+        ("#214149", C["dark_teal"], None),
+        ("#A5D2DF", C["light_pastel_blue"], None),
+        ("#468A9D", C["medium_teal"], None),
+        ("#494F55", C["charcoal"], None),
+        ("#A8B2BB", C["steel"], None),
+        ("#C19B4F", C["muted_gold"], None),
+        ("#FFFFFF", C["white"], None),
+        ("#C19B4F  →  #F3D593", None, (C["muted_gold"], C["gold_light"])),
+        ("#488DA0  →  #1A333A", None, (C["teal_horizon"], C["teal_deep"])),
+    ]
+
+    for i, (label, solid, gradient) in enumerate(swatches):
+        r, c = divmod(i, cols)
+        x = pad + c * (sw + gap)
+        y = pad + 52 + r * (sh + gap)
+        tile = Image.new("RGB", (sw, sh), solid or C["teal_deep"])
+        if gradient:
+            top, bot = gradient
+            arr = np.zeros((sh, sw, 3), dtype=np.float32)
+            for yy in range(sh):
+                arr[yy] = lerp(top, bot, yy / (sh - 1))
+            tile = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
+        img.paste(tile, (x, y))
+
+        sample = np.array(tile)[sh // 2, sw // 2]
+        luminance = 0.2126 * sample[0] + 0.7152 * sample[1] + 0.0722 * sample[2]
+        fill = C["teal_deep"] if luminance > 160 else C["white"]
+        bbox = draw.textbbox((0, 0), label, font=label_font)
+        tw = bbox[2] - bbox[0]
+        draw.text((x + (sw - tw) // 2, y + sh - 38), label, font=label_font, fill=fill)
+
+    return img
+
+
+def rounded_rect(draw: ImageDraw.ImageDraw, box, fill, radius=18):
+    draw.rounded_rectangle(box, radius=radius, fill=fill)
+
+
+def build_memo() -> Image.Image:
+    """Brand memo: fonts + palette + cover rules."""
+    mw, mh = 1600, 2100
+    img = Image.new("RGB", (mw, mh), C["teal_deep"])
+    draw = ImageDraw.Draw(img)
+
+    title_xl = load_font(FONT_TITLE, 72, "ExtraBold")
+    title_md = load_font(FONT_TITLE, 36, "Bold")
+    title_sm = load_font(FONT_TITLE, 28, "Bold")
+    body = load_font(FONT_BODY, 22, "Regular")
+    body_lg = load_font(FONT_BODY, 28, "Regular")
+    caption = load_font(FONT_BODY, 18, "Regular")
+    sample_title = load_font(FONT_TITLE, 64, "ExtraBold")
+    sample_body = load_font(FONT_BODY, 32, "Bold")
+
+    pad = 56
+    y = 48
+    draw.text((pad, y), "Английский маяк", font=title_xl, fill=C["white"])
+    y += 86
+    draw.text((pad, y), "Памятка: шрифты и палитра", font=body_lg, fill=C["light_pastel_blue"])
+    y += 56
+    draw.rectangle((pad, y, mw - pad, y + 3), fill=C["muted_gold"])
+    y += 36
+
+    # --- Fonts ---
+    draw.text((pad, y), "ШРИФТЫ", font=title_sm, fill=C["gold_light"])
+    y += 48
+
+    cards = [
+        {
+            "kicker": "Большой — для названия",
+            "name": "Sofia Sans Condensed",
+            "meta": "Начертание ExtraBold · заголовок обложки, логотип",
+            "sample": "АНГЛИЙСКИЙ МАЯК",
+            "sample_font": sample_title,
+        },
+        {
+            "kicker": "Маленький — для пояснения",
+            "name": "Open Sans",
+            "meta": "Начертание Bold · подзаголовок, описания",
+            "sample": "подготовка к ОГЭ и ЕГЭ по английскому языку",
+            "sample_font": sample_body,
+        },
+    ]
+    card_h = 210
+    for card in cards:
+        rounded_rect(draw, (pad, y, mw - pad, y + card_h), C["dark_teal"], 20)
+        draw.text((pad + 36, y + 22), card["kicker"], font=caption, fill=C["gold_light"])
+        draw.text((pad + 36, y + 52), card["name"], font=title_md, fill=C["white"])
+        draw.text((pad + 36, y + 98), card["meta"], font=caption, fill=C["steel"])
+        draw.text((pad + 36, y + 136), card["sample"], font=card["sample_font"], fill=C["white"])
+        y += card_h + 20
+
+    y += 16
+    draw.text((pad, y), "ПАЛИТРА ЛОГОТИПА", font=title_sm, fill=C["gold_light"])
+    y += 48
+
+    swatches = [
+        ("#214149", "Тёмный бирюзовый", "логотип, середина моря", C["dark_teal"], None),
+        ("#A5D2DF", "Светло-голубой", "блик, светлый акцент", C["light_pastel_blue"], None),
+        ("#468A9D", "Средний бирюзовый", "вода, второй цвет", C["medium_teal"], None),
+        ("#494F55", "Угольно-серый", "текст на светлом", C["charcoal"], None),
+        ("#A8B2BB", "Стальной", "второстепенный текст", C["steel"], None),
+        ("#C19B4F", "Золото", "лучи маяка", C["muted_gold"], None),
+        ("#FFFFFF", "Белый", "текст и башня маяка", C["white"], None),
+        ("#C19B4F → #F3D593", "Градиент золота", "свечение фонаря", None, (C["muted_gold"], C["gold_light"])),
+        ("#488DA0 → #1A333A", "Градиент моря", "фон обложки ВК", None, (C["teal_horizon"], C["teal_deep"])),
+    ]
+    cols = 3
+    sw, sh, gap = 480, 118, 18
+    for i, (hex_label, name, usage, solid, gradient) in enumerate(swatches):
+        r, c = divmod(i, cols)
+        x = pad + c * (sw + gap)
+        yy = y + r * (sh + gap)
+        box = (x, yy, x + sw, yy + sh)
+        if gradient:
+            tile = Image.new("RGB", (sw, sh), C["teal_deep"])
+            arr = np.zeros((sh, sw, 3), dtype=np.float32)
+            for row in range(sh):
+                arr[row] = lerp(gradient[0], gradient[1], row / (sh - 1))
+            tile = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
+            img.paste(tile, (x, yy))
+        else:
+            draw.rectangle(box, fill=solid)
+        sample_rgb = gradient[0] if gradient else solid
+        lum = 0.2126 * sample_rgb[0] + 0.7152 * sample_rgb[1] + 0.0722 * sample_rgb[2]
+        fill = C["teal_deep"] if lum > 165 else C["white"]
+        subfill = C["charcoal"] if lum > 165 else C["steel"]
+        draw.text((x + 18, yy + 16), name, font=load_font(FONT_TITLE, 24, "Bold"), fill=fill)
+        draw.text((x + 18, yy + 48), hex_label, font=caption, fill=fill)
+        draw.text((x + 18, yy + 76), usage, font=caption, fill=subfill)
+
+    y += 3 * (sh + gap) + 12
+    draw.text((pad, y), "ОБЛОЖКА ВК", font=title_sm, fill=C["gold_light"])
+    y += 44
+    rounded_rect(draw, (pad, y, mw - pad, y + 220), C["dark_teal"], 20)
+    rules = [
+        "Размер: 1920 × 768 px · формат PNG или JPG",
+        "Название: Sofia Sans Condensed ExtraBold, белый #FFFFFF · АНГЛИЙСКИЙ МАЯК",
+        "Подзаголовок: Open Sans Bold, белый #FFFFFF",
+        "Выравнивание: «АНГЛИЙСКИЙ МАЯК» ровно по центру над «подготовка…»",
+        "Фон: море #488DA0 → #214149 → #1A333A · маяк справа снизу, лучи #C19B4F",
+    ]
+    ry = y + 24
+    for line in rules:
+        draw.text((pad + 36, ry), "·  " + line, font=body, fill=C["white"])
+        ry += 36
+
+    return img
+
+
+def _logo_inside_mask(arr: np.ndarray) -> np.ndarray:
+    """Circle of the emblem, from the teal sky/sea (ignores the white page)."""
+    rgb = arr.astype(np.int16)
+    teal = (rgb[:, :, 2] > rgb[:, :, 0] + 16) & (rgb[:, :, 1] > rgb[:, :, 0] + 6)
+    ys, xs = np.where(teal)
+    cy, cx = float(np.median(ys)), float(np.median(xs))
+    r = float(np.percentile(np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2), 99.2))
+    yy, xx = np.ogrid[: arr.shape[0], : arr.shape[1]]
+    return (yy - cy) ** 2 + (xx - cx) ** 2 <= (r * 0.995) ** 2
+
+
+def logo_sky_sea() -> tuple[np.ndarray, np.ndarray]:
+    src = Image.open(LOGO_EMBLEM).convert("RGB")
+    arr = np.array(src)
+    inside = _logo_inside_mask(arr)
+    rgb = arr.astype(np.int16)
+    brightness = rgb.mean(axis=2)
+    teal = (rgb[:, :, 2] > rgb[:, :, 0] + 18) & (rgb[:, :, 1] > rgb[:, :, 0] + 8)
+    ys, xs = np.where(inside)
+    y0, y1 = int(ys.min()), int(ys.max())
+    split = y0 + int((y1 - y0) * 0.62)
+    sky_px = arr[inside & teal & (np.arange(arr.shape[0])[:, None] < split)]
+    sea_px = arr[inside & teal & (np.arange(arr.shape[0])[:, None] >= split)]
+    if len(sky_px) == 0:
+        sky = np.array(C["teal_horizon"], dtype=np.float32)
+    else:
+        sky = np.median(sky_px, axis=0).astype(np.float32)
+    if len(sea_px) == 0:
+        sea = np.array(C["dark_teal"], dtype=np.float32)
+    else:
+        sea = np.median(sea_px, axis=0).astype(np.float32)
+    return sky, sea
+
+
+def _logo_lighthouse_rgba() -> Image.Image:
+    src = Image.open(LOGO_EMBLEM).convert("RGB")
+    arr = np.array(src)
+    rgb = arr.astype(np.int16)
+    brightness = rgb.mean(axis=2)
+    gold = (rgb[:, :, 0] > 155) & (rgb[:, :, 1] > 95) & (rgb[:, :, 0] > rgb[:, :, 2] + 22)
+    teal = (
+        (rgb[:, :, 2] > rgb[:, :, 0] + 16)
+        & (rgb[:, :, 1] > rgb[:, :, 0] + 6)
+        & (brightness < 200)
+        & ~gold
+    )
+    ys, xs = np.where(teal)
+    cy, cx = float(np.median(ys)), float(np.median(xs))
+    r = float(np.percentile(np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2), 99.2))
+    yy, xx = np.ogrid[: arr.shape[0], : arr.shape[1]]
+    inside = (yy - cy) ** 2 + (xx - cx) ** 2 <= (r * 0.93) ** 2
+    white = (brightness > 200) & inside
+    dark = (brightness < 80) & inside & ~teal
+    keep = (gold | white | dark) & inside
+
+    alpha = Image.fromarray((keep.astype(np.uint8) * 255), "L")
+    alpha = alpha.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.7))
+    aa = np.array(alpha).astype(np.float32)
+    aa[teal] *= 0.03
+    aa[~inside] = 0
+    rgba = Image.fromarray(arr, "RGB").convert("RGBA")
+    rgba.putalpha(Image.fromarray(np.clip(aa, 0, 255).astype(np.uint8), "L"))
+    return rgba.crop(rgba.getbbox())
+
+
+def extract_lighthouse() -> Image.Image:
+    """Same lighthouse mask twice: white matching back, black silhouette in front."""
+    white_lh = _logo_lighthouse_rgba()
+    px = np.array(white_lh)
+    al = px[:, :, 3]
+    p = px.astype(np.int16)
+    # int16: uint8 `R > B + 45` wraps and classifies the white tower as gold.
+    gold2 = (p[:, :, 0] > 170) & (p[:, :, 1] > 110) & (p[:, :, 0] > p[:, :, 2] + 45) & (al > 40)
+    body = (al > 40) & ~gold2
+
+    present = body.any(axis=1)
+    ys = np.where(present)[0]
+    y_hi = int(ys[-1]) + 1 if len(ys) else body.shape[0]
+    for i in range(len(ys) - 1):
+        if ys[i + 1] - ys[i] > 8:
+            y_hi = int(ys[i]) + 1
+            break
+    water = body & (np.arange(body.shape[0])[:, None] >= y_hi)
+    tower = body & ~water
+
+    rim = 6
+    h, w = body.shape
+    cw, ch = w + rim * 2, h + rim * 2
+    origin = (rim, rim)
+
+    padded = Image.new("L", (cw, ch), 0)
+    padded.paste(Image.fromarray(np.where(body, 255, 0).astype(np.uint8), "L"), origin)
+    rim_a = padded.filter(ImageFilter.MaxFilter(rim * 2 + 1)).filter(ImageFilter.GaussianBlur(0.7))
+    white_back = Image.new("RGBA", (cw, ch), (255, 255, 255, 0))
+    white_back.putalpha(rim_a)
+
+    black = np.zeros((h, w, 4), np.uint8)
+    black[tower] = (12, 14, 16, 255)
+
+    gold_px = np.zeros((h, w, 4), np.uint8)
+    gold_px[gold2] = px[gold2]
+
+    water_px = np.zeros((h, w, 4), np.uint8)
+    water_px[water] = (255, 255, 255, 255)
+
+    canvas = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+    canvas.alpha_composite(white_back, (0, 0))
+    canvas.alpha_composite(Image.fromarray(black, "RGBA"), origin)
+    canvas.alpha_composite(Image.fromarray(gold_px, "RGBA"), origin)
+    canvas.alpha_composite(Image.fromarray(water_px, "RGBA"), origin)
+
+    pixels = np.array(canvas).astype(np.float32)
+    rgb, alpha = pixels[:, :, :3], pixels[:, :, 3]
+    r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+    gold_mask = (r > 170) & (g > 110) & (r > b + 45) & (alpha > 40)
+    gold_t = np.clip((rgb.mean(axis=2) - 140) / 90.0, 0.0, 1.0)
+    rgb[gold_mask] = lerp(C["muted_gold"], C["gold_light"], gold_t[:, :, None])[gold_mask]
+    out = np.dstack([np.clip(rgb, 0, 255), np.clip(alpha, 0, 255)]).astype(np.uint8)
+    lh = Image.fromarray(out, "RGBA")
+    bbox = lh.getbbox()
+    lh = lh.crop(bbox)
+    target_h = 300
+    scale = target_h / lh.height
+    return lh.resize((max(1, int(lh.width * scale)), target_h), Image.Resampling.LANCZOS)
+
+
+def build_background() -> Image.Image:
+    """Crop the original gradient+lighthouse artwork to the VK cover size."""
+    src_path = SEA_SOURCE if SEA_SOURCE.exists() else ASSETS_LIGHTHOUSE
+    src = Image.open(src_path).convert("RGB")
+    sw, sh = src.size
+    crop_h = min(sh, int(round(sw / (W / H))))
+    y0 = max(0, sh - crop_h)
+    return src.crop((0, y0, sw, sh)).resize((W, H), Image.Resampling.LANCZOS)
+
+
+def draw_cover_text(canvas: Image.Image) -> None:
+    draw = ImageDraw.Draw(canvas)
+    # All caps: Sofia's lowercase к is a Latin k with an ascender.
+    # The logo itself uses АНГЛИЙСКИЙ МАЯК, so the title matches it.
+    title_font = load_font(FONT_TITLE, 88, "ExtraBold")
+    sub_font = load_font(FONT_BODY, 50, "Bold")
+    white = (*C["white"], 255)
+    shadow = (*C["teal_deep"], 160)
+
+    title_w = title_font.getlength(TITLE_TEXT)
+    sub_w = sub_font.getlength(SUBTITLE_TEXT)
+    cx = W / 2
+    title_x = cx - title_w / 2
+    sub_x = cx - sub_w / 2
+
+    ascent, _d = title_font.getmetrics()
+    sub_ascent, _sd = sub_font.getmetrics()
+    gap = 56
+    top = H * 0.30 - (ascent + gap + sub_ascent) / 2
+    title_baseline = top + ascent
+    sub_baseline = title_baseline + gap + sub_ascent
+
+    for dx, dy in ((0, 3), (3, 3)):
+        draw.text((title_x + dx, title_baseline + dy), TITLE_TEXT, font=title_font, fill=shadow, anchor="ls")
+        draw.text((sub_x + dx, sub_baseline + dy), SUBTITLE_TEXT, font=sub_font, fill=shadow, anchor="ls")
+    draw.text((title_x, title_baseline), TITLE_TEXT, font=title_font, fill=white, anchor="ls")
+    draw.text((sub_x, sub_baseline), SUBTITLE_TEXT, font=sub_font, fill=white, anchor="ls")
+
+    print(f"align cx={cx:.1f} title_w={title_w:.1f} sub_w={sub_w:.1f}")
+    print(f"title_x={title_x:.1f} sub_x={sub_x:.1f}")
+
+
+def build_cover() -> Image.Image:
+    cover = build_background().convert("RGBA")
+    draw_cover_text(cover)
+    out = cover.convert("RGB")
+    assert out.size == (W, H)
+    return out
+
+
+def _instance_varfont(src: Path, dst: Path, **axes) -> Path:
+    from fontTools.ttLib import TTFont
+    from fontTools.varLib.instancer import instantiateVariableFont
+
+    font = TTFont(str(src))
+    instantiated = instantiateVariableFont(font, axes, overlap=True)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    instantiated.save(str(dst))
+    return dst
+
+
+def build_brand_pdf(path: Path) -> None:
+    """A4 PDF: both fonts with samples, every palette color and both gradients."""
+    from reportlab.lib.colors import HexColor, Color
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont as RLFont
+    from reportlab.pdfgen import canvas
+
+    font_dir = Path("/tmp/am-pdf-fonts")
+    sofia_eb = _instance_varfont(FONTS / "SofiaSansCondensed.ttf", font_dir / "SofiaSansCondensed-ExtraBold.ttf", wght=800)
+    sofia_bd = _instance_varfont(FONTS / "SofiaSansCondensed.ttf", font_dir / "SofiaSansCondensed-Bold.ttf", wght=700)
+    open_bd = _instance_varfont(FONTS / "OpenSans.ttf", font_dir / "OpenSans-Bold.ttf", wght=700)
+    open_rg = _instance_varfont(FONTS / "OpenSans.ttf", font_dir / "OpenSans-Regular.ttf", wght=400)
+    pdfmetrics.registerFont(RLFont("SofiaEB", str(sofia_eb)))
+    pdfmetrics.registerFont(RLFont("SofiaBD", str(sofia_bd)))
+    pdfmetrics.registerFont(RLFont("OpenBD", str(open_bd)))
+    pdfmetrics.registerFont(RLFont("OpenRG", str(open_rg)))
+
+    page_w, page_h = A4
+    c = canvas.Canvas(str(path), pagesize=A4)
+    c.setTitle("Английский маяк — шрифты и палитра")
+    c.setAuthor("Английский маяк")
+
+    deep = HexColor("#1A333A")
+    dark = HexColor("#214149")
+    white = HexColor("#FFFFFF")
+    gold = HexColor("#C19B4F")
+    gold_l = HexColor("#F3D593")
+    steel = HexColor("#A8B2BB")
+    pastel = HexColor("#A5D2DF")
+    margin = 36
+
+    def fill_page() -> None:
+        c.setFillColor(deep)
+        c.rect(0, 0, page_w, page_h, fill=1, stroke=0)
+
+    def y_from_top(top: float) -> float:
+        return page_h - top
+
+    def heading(text: str, top: float, size: float = 13) -> None:
+        c.setFillColor(gold_l)
+        c.setFont("SofiaBD", size)
+        c.drawString(margin, y_from_top(top), text)
+
+    def gold_rule(top: float) -> None:
+        c.setFillColor(gold)
+        c.rect(margin, y_from_top(top) - 1.5, page_w - 2 * margin, 2.2, fill=1, stroke=0)
+
+    def round_card(x: float, top: float, w: float, h: float, fill: Color) -> None:
+        c.setFillColor(fill)
+        c.roundRect(x, y_from_top(top + h), w, h, 10, fill=1, stroke=0)
+
+    def paint_gradient(x: float, y: float, w: float, h: float, start: str, end: str) -> None:
+        sr, sg, sb = hex_to_rgb(start)
+        er, eg, eb = hex_to_rgb(end)
+        steps = max(48, int(w))
+        for i in range(steps):
+            t = i / (steps - 1)
+            c.setFillColor(Color((sr + (er - sr) * t) / 255, (sg + (eg - sg) * t) / 255, (sb + (eb - sb) * t) / 255))
+            c.rect(x + w * i / steps, y, w / steps + 0.4, h, fill=1, stroke=0)
+
+    # --- Page 1: fonts ---
+    fill_page()
+    c.setFillColor(white)
+    c.setFont("SofiaEB", 28)
+    c.drawString(margin, y_from_top(52), "Английский маяк")
+    c.setFillColor(pastel)
+    c.setFont("OpenRG", 12)
+    c.drawString(margin, y_from_top(74), "Памятка: шрифты и палитра")
+    gold_rule(88)
+
+    heading("ШРИФТЫ", 118)
+    fonts_spec = [
+        (
+            "Большой — для названия",
+            PALETTE["fonts"]["title"]["family"],
+            f"Начертание {PALETTE['fonts']['title']['weight']} · ось веса {PALETTE['fonts']['title']['weight_axis']} · файл {PALETTE['fonts']['title']['file']}",
+            PALETTE["fonts"]["title"]["usage_ru"],
+            PALETTE["fonts"]["title"]["sample"],
+            "SofiaEB",
+            26,
+        ),
+        (
+            "Маленький — для пояснения",
+            PALETTE["fonts"]["body"]["family"],
+            f"Начертание {PALETTE['fonts']['body']['weight']} · ось веса {PALETTE['fonts']['body']['weight_axis']} · файл {PALETTE['fonts']['body']['file']}",
+            PALETTE["fonts"]["body"]["usage_ru"],
+            PALETTE["fonts"]["body"]["sample"],
+            "OpenBD",
+            14,
+        ),
+    ]
+    top = 138
+    card_h = 118
+    for kicker, family, meta, usage, sample, face, size in fonts_spec:
+        round_card(margin, top, page_w - 2 * margin, card_h, dark)
+        c.setFillColor(gold_l)
+        c.setFont("OpenRG", 9)
+        c.drawString(margin + 16, y_from_top(top + 20), kicker)
+        c.setFillColor(white)
+        c.setFont("SofiaBD", 16)
+        c.drawString(margin + 16, y_from_top(top + 42), family)
+        c.setFillColor(steel)
+        c.setFont("OpenRG", 9)
+        c.drawString(margin + 16, y_from_top(top + 60), meta)
+        c.drawString(margin + 16, y_from_top(top + 74), usage)
+        c.setFillColor(white)
+        c.setFont(face, size)
+        c.drawString(margin + 16, y_from_top(top + 102), sample)
+        top += card_h + 12
+
+    round_card(margin, top, page_w - 2 * margin, 92, dark)
+    c.setFillColor(gold_l)
+    c.setFont("SofiaBD", 12)
+    c.drawString(margin + 16, y_from_top(top + 22), "Как использовать")
+    c.setFillColor(white)
+    c.setFont("OpenRG", 10)
+    lines = [
+        "Заголовок обложки и логотипа: Sofia Sans Condensed ExtraBold, белый #FFFFFF, капитами: АНГЛИЙСКИЙ МАЯК.",
+        "Подзаголовок: Open Sans Bold, белый #FFFFFF: подготовка к ОГЭ и ЕГЭ по английскому языку.",
+        "Не набирать название строчными: в Sofia Sans Condensed буква «к» выглядит как латинская k.",
+        "Лицензия обоих шрифтов: SIL Open Font License 1.1.",
+    ]
+    ly = top + 40
+    for line in lines:
+        c.drawString(margin + 16, y_from_top(ly), line)
+        ly += 14
+
+    c.setFillColor(steel)
+    c.setFont("OpenRG", 8)
+    c.drawRightString(page_w - margin, 22, "1 / 2")
+    c.showPage()
+
+    # --- Page 2: full palette ---
+    fill_page()
+    c.setFillColor(white)
+    c.setFont("SofiaEB", 22)
+    c.drawString(margin, y_from_top(48), "Палитра логотипа")
+    c.setFillColor(pastel)
+    c.setFont("OpenRG", 10)
+    c.drawString(margin, y_from_top(66), "Все цвета из логотипа · HEX · RGB · назначение")
+    gold_rule(78)
+    heading("ЦВЕТА", 102)
+
+    colors = list(PALETTE["colors"].items())
+    cols = 2
+    gap = 10
+    usable = page_w - 2 * margin
+    card_w = (usable - gap) / cols
+    color_h = 62
+    top = 118
+    for i, (_key, item) in enumerate(colors):
+        col = i % cols
+        row = i // cols
+        x = margin + col * (card_w + gap)
+        t = top + row * (color_h + gap)
+        hex_value = item["hex"]
+        rgb = item["rgb"]
+        round_card(x, t, card_w, color_h, dark)
+        c.setFillColor(HexColor(hex_value))
+        c.roundRect(x + 8, y_from_top(t + color_h) + 8, 46, color_h - 16, 6, fill=1, stroke=0)
+        if hex_value.upper() == "#FFFFFF":
+            c.setStrokeColor(steel)
+            c.setLineWidth(0.6)
+            c.roundRect(x + 8, y_from_top(t + color_h) + 8, 46, color_h - 16, 6, fill=0, stroke=1)
+        c.setFillColor(white)
+        c.setFont("SofiaBD", 11)
+        c.drawString(x + 64, y_from_top(t + 20), item["name_ru"])
+        c.setFillColor(gold_l)
+        c.setFont("OpenBD", 9)
+        c.drawString(x + 64, y_from_top(t + 36), hex_value)
+        c.setFillColor(steel)
+        c.setFont("OpenRG", 8)
+        c.drawString(x + 128, y_from_top(t + 36), f"RGB {rgb[0]}, {rgb[1]}, {rgb[2]}")
+        c.drawString(x + 64, y_from_top(t + 50), item["usage_ru"])
+
+    rows = (len(colors) + cols - 1) // cols
+    top = 118 + rows * (color_h + gap) + 8
+    heading("ГРАДИЕНТЫ", top)
+    top += 18
+    grad_h = 58
+    for _key, item in PALETTE["gradients"].items():
+        start, end = item["stops"]
+        round_card(margin, top, page_w - 2 * margin, grad_h, dark)
+        paint_gradient(margin + 8, y_from_top(top + grad_h) + 8, 210, grad_h - 16, start, end)
+        c.setFillColor(white)
+        c.setFont("SofiaBD", 11)
+        c.drawString(margin + 230, y_from_top(top + 20), f"{start}  →  {end}")
+        c.setFillColor(steel)
+        c.setFont("OpenRG", 9)
+        direction = "сверху вниз" if "top" in item["direction"] else item["direction"]
+        c.drawString(margin + 230, y_from_top(top + 36), f"{item['usage']} · {direction}")
+        top += grad_h + 10
+
+    heading("ОБЛОЖКА ВК", top)
+    top += 16
+    cover = PALETTE["cover"]
+    round_card(margin, top, page_w - 2 * margin, 92, dark)
+    cover_lines = [
+        f"Размер: {cover['size'][0]} × {cover['size'][1]} px · формат {', '.join(cover['formats'])}",
+        f"Название: {PALETTE['usage']['cover_title_font']}, {cover['title_color']} · {cover['title']}",
+        f"Подзаголовок: {PALETTE['usage']['cover_body_font']}, {cover['subtitle_color']} · {cover['subtitle']}",
+        f"{cover['alignment']}. Маяк: справа снизу. Фон: градиент моря. Лучи: золотой градиент.",
+    ]
+    c.setFillColor(white)
+    c.setFont("OpenRG", 10)
+    ly = top + 22
+    for line in cover_lines:
+        c.drawString(margin + 16, y_from_top(ly), line)
+        ly += 16
+
+    c.setFillColor(steel)
+    c.setFont("OpenRG", 8)
+    c.drawRightString(page_w - margin, 22, "2 / 2")
+    c.save()
+
+
+def main() -> None:
+    board = build_palette_board()
+    board.save(ROOT / "palette.png", "PNG", optimize=True)
+
+    memo = build_memo()
+    # Trim empty bottom so the sheet is compact
+    arr = np.array(memo)
+    bg = np.array(C["teal_deep"], dtype=np.int16)
+    diff = np.abs(arr.astype(np.int16) - bg).sum(axis=2)
+    rows = np.where(diff > 12)[0]
+    if len(rows):
+        bottom = min(memo.height, int(rows.max()) + 56)
+        memo = memo.crop((0, 0, memo.width, bottom))
+    memo.save(ROOT / "pamyatka.png", "PNG", optimize=True)
+    memo.save(ROOT / "pamyatka.jpg", "JPEG", quality=95, optimize=True)
+
+    cover = build_cover()
+    cover.save(ROOT / "angliyskiy-mayak-1920x768.png", "PNG")
+    cover.save(ROOT / "angliyskiy-mayak-1920x768.jpg", "JPEG", quality=98, subsampling=0)
+
+    pdf_path = ROOT / "pamyatka-shrifty-i-palitra.pdf"
+    build_brand_pdf(pdf_path)
+
+    artifacts = Path("/opt/cursor/artifacts")
+    artifacts.mkdir(parents=True, exist_ok=True)
+    cover.save(artifacts / "oblozhka-vk-1920x768.png", "PNG")
+    cover.save(artifacts / "oblozhka-vk-1920x768.jpg", "JPEG", quality=98, subsampling=0)
+    cover.save(artifacts / "angliyskiy-mayak-1920x768.png", "PNG")
+    memo.save(artifacts / "pamyatka.png", "PNG")
+    board.save(artifacts / "palette.png", "PNG")
+    import shutil
+    shutil.copy(pdf_path, artifacts / "pamyatka-shrifty-i-palitra.pdf")
+    shutil.copy(pdf_path, artifacts / "pamyatka.pdf")
+
+    import zipfile
+
+    zip_path = ROOT / "oblozhka-vk-angliyskiy-mayak.zip"
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.write(ROOT / "angliyskiy-mayak-1920x768.png", "oblozhka-vk-1920x768.png")
+        zf.write(ROOT / "angliyskiy-mayak-1920x768.jpg", "oblozhka-vk-1920x768.jpg")
+        zf.write(ROOT / "pamyatka.png", "pamyatka.png")
+        zf.write(ROOT / "palette.png", "palette.png")
+        zf.write(pdf_path, "pamyatka-shrifty-i-palitra.pdf")
+    try:
+        shutil.copy(zip_path, artifacts / "oblozhka-vk-angliyskiy-mayak.zip")
+    except OSError:
+        pass
+    print("wrote memo, palette, pdf and cover", cover.size, memo.size, pdf_path)
+
+
+if __name__ == "__main__":
+    main()
