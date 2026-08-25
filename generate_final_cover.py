@@ -4,15 +4,14 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import cairosvg
 
-def create_master_cover_designer_artwork():
+def create_master_cover_curved_beams():
     W, H = 1920, 768
     
     # 1. Background Sea Gradient:
-    # Deep, smooth, clean sea gradient (#1A333A at top to #488DA0 at bottom)
+    # Deep sea navy/teal #1A333A at top to sea teal #488DA0 at bottom
     y_coords, x_coords = np.mgrid[0:H, 0:W]
     
     c_top = np.array([26, 51, 58], dtype=np.float32)       # #1A333A
-    c_mid = np.array([33, 65, 73], dtype=np.float32)       # #214149
     c_bottom = np.array([72, 141, 160], dtype=np.float32)  # #488DA0
     
     norm_y = y_coords / H
@@ -33,7 +32,7 @@ def create_master_cover_designer_artwork():
     mist_draw.ellipse((1100, 200, 2200, 900), fill=(72, 141, 160, 45))
     mist_layer = mist_layer.filter(ImageFilter.GaussianBlur(90))
     
-    # Lighthouse position in bottom right (matches layout):
+    # Lighthouse position in bottom right:
     lh_cx = 1640
     lh_cy = 575
     lh_size = 460
@@ -60,24 +59,22 @@ def create_master_cover_designer_artwork():
     canvas = Image.alpha_composite(canvas, halo_layer)
     canvas = Image.alpha_composite(canvas, beam_layer)
     
-    # 3. Paste the True Designer Lighthouse Artwork from SVG:
-    from test_designer_svg_v3 import build_designer_exact_svg_v3
-    svg_str = build_designer_exact_svg_v3(1500)
+    # 3. Paste the Curved-Beam Lighthouse Artwork from SVG:
+    from test_curved_beams import build_curved_beams_svg
+    svg_str = build_curved_beams_svg(1500)
     
-    # Also save the official SVG file in the repo
+    # Save the official SVG file in the repo
     with open('/workspace/lighthouse_designer.svg', 'w', encoding='utf-8') as f:
         f.write(svg_str)
         
-    tmp_lh_png = "/tmp/lh_designer_render.png"
+    tmp_lh_png = "/tmp/lh_designer_curved_render.png"
     cairosvg.svg2png(bytestring=svg_str.encode('utf-8'), write_to=tmp_lh_png, output_width=1500, output_height=1500)
     lh_img = Image.open(tmp_lh_png).convert("RGBA")
     
     lh_resized = lh_img.resize((lh_size, lh_size), Image.Resampling.LANCZOS)
     canvas.paste(lh_resized, (lh_cx - lh_size // 2, lh_cy - lh_size // 2), lh_resized)
     
-    # 4. Typography (Exact fonts, sizes, colors and central placement):
-    # Title: «АНГЛИЙСКИЙ МАЯК» — Sofia Sans Condensed ExtraBold (800), #FFFFFF
-    # Subtitle: «подготовка к ОГЭ и ЕГЭ по английскому языку» — Open Sans Regular (400), #A5D2DF
+    # 4. Typography (Sofia Sans Condensed ExtraBold & Open Sans Regular, centered):
     text_layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(text_layer)
     
@@ -124,7 +121,7 @@ def create_master_cover_designer_artwork():
     final_cover.save("/workspace/vk_cover_1920x768.png", "PNG", quality=100)
     final_cover.convert("RGB").save("/workspace/vk_cover_1920x768.jpg", "JPEG", quality=98)
     
-    print("Master cover generated successfully!")
+    print("Master cover with curved beams generated successfully!")
 
 if __name__ == '__main__':
-    create_master_cover_designer_artwork()
+    create_master_cover_curved_beams()

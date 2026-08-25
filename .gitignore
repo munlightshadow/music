@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 
 # Temporary test files
+test_curved_beams*
+lighthouse_curved_beams*
 test_designer_svg*
 lighthouse_designer_exact*
 lighthouse_designer_v2*
