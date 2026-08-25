@@ -3,6 +3,10 @@ __pycache__/
 *.pyc
 
 # Temporary test files
+test_designer_svg*
+lighthouse_designer_exact*
+lighthouse_designer_v2*
+lighthouse_designer_v3*
 generate_cover_variants.py
 generate_detailed_lighthouse.py
 generate_lighthouse.py
