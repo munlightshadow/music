@@ -344,25 +344,17 @@ def extract_lighthouse() -> Image.Image:
     return lh.resize((max(1, int(lh.width * scale)), target_h), Image.Resampling.LANCZOS)
 
 
-def build_sea() -> Image.Image:
-    """Use the original wide sea artwork (dark textured navy/teal)."""
+def build_background() -> Image.Image:
+    """Crop the original gradient+lighthouse artwork to the VK cover size."""
     src_path = SEA_SOURCE if SEA_SOURCE.exists() else ASSETS_LIGHTHOUSE
     src = Image.open(src_path).convert("RGB")
     sw, sh = src.size
-    crop_h = int(round(sw / (W / H)))
+    crop_h = min(sh, int(round(sw / (W / H))))
     y0 = max(0, sh - crop_h)
-    base = src.crop((0, y0, sw, sh)).resize((W, H), Image.Resampling.LANCZOS)
-    arr = np.array(base).astype(np.float32)
-    # Cover the old white lighthouse on the right by extending nearby sea
-    donor = arr[:, 980:1180, :].copy()
-    for x in range(1240, W):
-        di = int((x * 0.41) % (donor.shape[1] - 1))
-        fade = min(1.0, (x - 1240) / 90.0)
-        arr[:, x, :] = arr[:, x, :] * (1.0 - fade) + donor[:, di, :] * fade
-    return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
+    return src.crop((0, y0, sw, sh)).resize((W, H), Image.Resampling.LANCZOS)
 
 
-def draw_cover_text(canvas: Image.Image, lighthouse_left: int) -> None:
+def draw_cover_text(canvas: Image.Image) -> None:
     draw = ImageDraw.Draw(canvas)
     # All caps: Sofia's lowercase к is a Latin k with an ascender.
     # The logo itself uses АНГЛИЙСКИЙ МАЯК, so the title matches it.
@@ -373,12 +365,7 @@ def draw_cover_text(canvas: Image.Image, lighthouse_left: int) -> None:
 
     title_w = title_font.getlength(TITLE_TEXT)
     sub_w = sub_font.getlength(SUBTITLE_TEXT)
-    block_w = max(title_w, sub_w)
-
     cx = W / 2
-    if cx + block_w / 2 > lighthouse_left - 48:
-        cx = max(block_w / 2 + 36, lighthouse_left - 48 - block_w / 2)
-
     title_x = cx - title_w / 2
     sub_x = cx - sub_w / 2
 
@@ -396,19 +383,13 @@ def draw_cover_text(canvas: Image.Image, lighthouse_left: int) -> None:
     draw.text((sub_x, sub_baseline), SUBTITLE_TEXT, font=sub_font, fill=white, anchor="ls")
 
     print(f"align cx={cx:.1f} title_w={title_w:.1f} sub_w={sub_w:.1f}")
-    print(f"title_x={title_x:.1f} sub_x={sub_x:.1f} lh_left={lighthouse_left}")
+    print(f"title_x={title_x:.1f} sub_x={sub_x:.1f}")
 
 
 def build_cover() -> Image.Image:
-    sea = build_sea().convert("RGBA")
-    lh = extract_lighthouse()
-    lh.save(LAYERED_LIGHTHOUSE, "PNG")
-    pad_r, pad_b = 56, 22
-    lx = W - lh.width - pad_r
-    ly = H - lh.height - pad_b
-    sea.alpha_composite(lh, (lx, ly))
-    draw_cover_text(sea, lx)
-    out = sea.convert("RGB")
+    cover = build_background().convert("RGBA")
+    draw_cover_text(cover)
+    out = cover.convert("RGB")
     assert out.size == (W, H)
     return out
 
