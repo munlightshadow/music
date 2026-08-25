@@ -1,56 +1,95 @@
 {
   "name": "Английский маяк",
   "source": "logo",
+  "fonts": {
+    "title": {
+      "family": "Sofia Sans Condensed",
+      "file": "fonts/SofiaSansCondensed.ttf",
+      "weight": "ExtraBold",
+      "weight_axis": 800,
+      "usage_ru": "Большой шрифт для названия: заголовок обложки, логотип",
+      "sample": "Английский маяк"
+    },
+    "body": {
+      "family": "Open Sans",
+      "file": "fonts/OpenSans.ttf",
+      "weight": "Regular",
+      "weight_axis": 400,
+      "usage_ru": "Маленький шрифт: подзаголовок, описания, поясняющий текст",
+      "sample": "подготовка к ОГЭ и ЕГЭ по английскому языку"
+    }
+  },
+  "cover": {
+    "size": [1920, 768],
+    "formats": ["PNG", "JPG"],
+    "title": "Английский маяк:",
+    "subtitle": "подготовка к ОГЭ и ЕГЭ по английскому языку",
+    "alignment": "Заголовок ровно по центру над подзаголовком",
+    "title_color": "#FFFFFF",
+    "subtitle_color": "#FFFFFF",
+    "background": "sea",
+    "lighthouse": "bottom-right"
+  },
   "colors": {
     "dark_teal": {
       "hex": "#214149",
       "rgb": [33, 65, 73],
-      "name_ru": "Тёмный бирюзовый"
+      "name_ru": "Тёмный бирюзовый",
+      "usage_ru": "Основной цвет логотипа, середина фона-моря"
     },
     "light_pastel_blue": {
       "hex": "#A5D2DF",
       "rgb": [165, 210, 223],
-      "name_ru": "Светло-голубой"
+      "name_ru": "Светло-голубой",
+      "usage_ru": "Светлый акцент, блик на горизонте"
     },
     "medium_teal": {
       "hex": "#468A9D",
       "rgb": [70, 138, 157],
-      "name_ru": "Средний бирюзовый"
+      "name_ru": "Средний бирюзовый",
+      "usage_ru": "Второй цвет логотипа, вода"
     },
     "charcoal": {
       "hex": "#494F55",
       "rgb": [73, 79, 85],
-      "name_ru": "Угольно-серый"
+      "name_ru": "Угольно-серый",
+      "usage_ru": "Нейтральный текст на светлом"
     },
     "steel": {
       "hex": "#A8B2BB",
       "rgb": [168, 178, 187],
-      "name_ru": "Стальной серо-голубой"
+      "name_ru": "Стальной серо-голубой",
+      "usage_ru": "Второстепенный текст, линии"
     },
     "muted_gold": {
       "hex": "#C19B4F",
       "rgb": [193, 155, 79],
-      "name_ru": "Приглушённое золото"
+      "name_ru": "Приглушённое золото",
+      "usage_ru": "Лучи маяка, акценты"
     },
     "white": {
       "hex": "#FFFFFF",
       "rgb": [255, 255, 255],
-      "name_ru": "Белый"
+      "name_ru": "Белый",
+      "usage_ru": "Текст обложки, башня маяка"
     },
     "gold_light": {
       "hex": "#F3D593",
       "rgb": [243, 213, 147],
-      "name_ru": "Светлое золото"
+      "name_ru": "Светлое золото",
+      "usage_ru": "Светлая часть золотого градиента"
     },
     "teal_horizon": {
       "hex": "#488DA0",
       "rgb": [72, 141, 160],
-      "name_ru": "Бирюза горизонта"
+      "name_ru": "Бирюза горизонта",
+      "usage_ru": "Верх фона-моря"
     },
     "teal_deep": {
       "hex": "#1A333A",
       "rgb": [26, 51, 58],
-      "name_ru": "Глубокий морской"
+      "name_ru": "Глубокий морской",
+      "usage_ru": "Низ фона-моря, подложки"
     }
   },
   "gradients": {
@@ -68,6 +107,8 @@
   "usage": {
     "cover_background": ["sea", "dark_teal"],
     "cover_text": "white",
+    "cover_title_font": "Sofia Sans Condensed ExtraBold",
+    "cover_body_font": "Open Sans Regular",
     "lighthouse": "white",
     "lighthouse_beams": "gold",
     "logo_primary": "dark_teal"
