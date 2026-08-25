@@ -1,0 +1,8 @@
+# Python
+__pycache__/
+*.pyc
+
+# Temporary test files
+*_test.*
+*v1*.*
+*v2*.*
