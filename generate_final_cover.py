@@ -11,13 +11,8 @@ def create_perfect_vk_cover(
     W, H = 1920, 768
     
     # 1. Background Sea Gradient:
-    # Top: Dark navy/teal (#17272D)
-    # Bottom: Rich sea teal with soft lighting (#386E7C)
+    # Deep sea navy/teal at the top, soft rich sea teal with gentle lighting towards bottom
     y_coords, x_coords = np.mgrid[0:H, 0:W]
-    
-    # Top color: (23, 39, 45) -> #17272D
-    # Mid color: (38, 72, 82) -> #264852
-    # Bottom color: (56, 110, 124) -> #386E7C
     
     c_top = np.array([23, 39, 45], dtype=np.float32)
     c_mid = np.array([38, 72, 82], dtype=np.float32)
@@ -26,7 +21,6 @@ def create_perfect_vk_cover(
     norm_y = y_coords / H
     norm_x = x_coords / W
     
-    # Smooth progression from top to bottom
     t1 = np.clip(norm_y * 1.35 - 0.1, 0.0, 1.0)
     rgb_base = (1.0 - t1[:, :, np.newaxis]) * c_top + t1[:, :, np.newaxis] * c_mid
     
@@ -40,24 +34,17 @@ def create_perfect_vk_cover(
     mist_layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     mist_draw = ImageDraw.Draw(mist_layer)
     
-    # Soft wide clouds/ellipses for depth
     mist_draw.ellipse((-300, 320, 1100, 950), fill=(72, 141, 160, 45))
     mist_draw.ellipse((500, 380, 1900, 1050), fill=(70, 138, 157, 55))
     mist_draw.ellipse((1100, 260, 2200, 950), fill=(72, 141, 160, 50))
     mist_layer = mist_layer.filter(ImageFilter.GaussianBlur(90))
     
     # 3. Lighthouse Position & Sizing
-    # In screenshot:
-    # Center X: 1640
-    # Water base bottom line is right near y=700.
-    # Spire top is near y=450.
-    # Total height of artwork is ~520px, width ~520px.
-    # Center Y of the bounding box = 560
+    # Matches the VK Editor crop layout perfectly
     lh_cx = 1640
     lh_cy = 560
     lh_size = 520
     
-    # Lantern is located around (lh_cx, lh_cy - 0.12 * lh_size) -> ~y=498
     lantern_x = lh_cx
     lantern_y = lh_cy - int(lh_size * 0.12)
     
@@ -73,9 +60,9 @@ def create_perfect_vk_cover(
     canvas = Image.alpha_composite(bg_img, mist_layer)
     canvas = Image.alpha_composite(canvas, halo_layer)
     
-    # 4. Render Transparent Lighthouse Artwork from SVG
-    from generate_transparent_lh import generate_transparent_lighthouse_svg
-    svg_str = generate_transparent_lighthouse_svg(1500)
+    # 4. Render Updated Vector Lighthouse Artwork from SVG
+    from generate_accurate_lh import generate_perfect_logo_lighthouse_svg
+    svg_str = generate_perfect_logo_lighthouse_svg(1500)
     tmp_lh_png = "/tmp/lh_transparent_rendered.png"
     cairosvg.svg2png(bytestring=svg_str.encode('utf-8'), write_to=tmp_lh_png, output_width=1500, output_height=1500)
     lh_img = Image.open(tmp_lh_png).convert("RGBA")
@@ -83,7 +70,7 @@ def create_perfect_vk_cover(
     lh_resized = lh_img.resize((lh_size, lh_size), Image.Resampling.LANCZOS)
     canvas.paste(lh_resized, (lh_cx - lh_size // 2, lh_cy - lh_size // 2), lh_resized)
     
-    # 5. Centered Typography
+    # 5. Centered Typography (Unchanged)
     # Title: «АНГЛИЙСКИЙ МАЯК» — Sofia Sans Condensed ExtraBold (800)
     # Subtitle: «подготовка к ОГЭ и ЕГЭ по английскому языку» — Open Sans Regular (400)
     text_layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -104,7 +91,6 @@ def create_perfect_vk_cover(
     gap = 26
     tot_h = th + gap + sh
     
-    # Vertically centered in the visible cover area
     top_y = (H - tot_h) // 2 - 10
     
     tx = (W - tw) // 2
@@ -113,14 +99,14 @@ def create_perfect_vk_cover(
     sx = (W - sw) // 2
     sy = ty + th + gap
     
-    # Shadow for title
+    # Text shadow for title
     for dx, dy, a in [(-2, -2, 40), (2, 2, 80), (0, 4, 110), (0, 8, 80)]:
         draw.text((tx + dx, ty + dy), title_text, font=font_title, fill=(12, 22, 26, a))
         
-    # Title in pure #FFFFFF
+    # Title text (#FFFFFF)
     draw.text((tx, ty), title_text, font=font_title, fill=(255, 255, 255, 255))
     
-    # Subtitle shadow & text in light sea aqua (#A5D2DF)
+    # Subtitle shadow & text (#A5D2DF)
     draw.text((sx, sy + 2), sub_text, font=font_sub, fill=(12, 22, 26, 120))
     draw.text((sx, sy), sub_text, font=font_sub, fill=(175, 220, 230, 255))
     

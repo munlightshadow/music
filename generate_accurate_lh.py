@@ -1,4 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1500" height="1500">
+import os
+import cairosvg
+
+def generate_perfect_logo_lighthouse_svg(size=1200):
+    """
+    Exact visual replica of the logo SVG:
+    
+    1. Gold Light Beams:
+       - The beams are wide trapezoids expanding from the lantern room.
+       - In the emblem, the beam edges go:
+         Left: from (465, 375) to (10, 345) on top, and (465, 395) to (10, 420) on bottom.
+         Right: from (535, 375) to (990, 345) on top, and (535, 395) to (990, 420) on bottom.
+       - Color: #F3D593 -> #C19B4F.
+       
+    2. Lantern Room & Lamp:
+       - Top platform cornice (white)
+       - 3 glass panels (dark teal #214149) separated by vertical white mullions
+       - Glowing golden lantern bulb in the center panel (#F3D593 with halo)
+       - Lower gallery platform and railing with 5 vertical balusters
+       
+    3. Tower:
+       - Tapered white masonry tower
+       - Two-tone 3D shading:
+         Left half is clean bright white (#FFFFFF)
+         Right half is soft light-blue shadow (#E2EDF2)
+       - 3 dark teal openings aligned vertically:
+         - Top round window (arched)
+         - Middle round window (arched)
+         - Bottom entryway door (arched top)
+         
+    4. Rocky Island Base:
+       - Pure white stylized rock island
+       - Multiple dark teal (#214149) crevice contour lines following the natural form
+       
+    5. Water Reflections:
+       - Inverted triangular stack of horizontal ripple lines below the island
+       - Alternating crisp white (#FFFFFF) and aqua blue (#A5D2DF)
+       - Lines progressively decrease in length downwards to create reflection perspective
+    """
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="{size}" height="{size}">
   <defs>
     <!-- Gold Beam Gradients -->
     <linearGradient id="beamLeftGrad" x1="470" y1="385" x2="10" y2="385" gradientUnits="userSpaceOnUse">
@@ -118,4 +157,12 @@
     <circle cx="500" cy="316" r="7" fill="#FFFFFF" />
     <line x1="500" y1="298" x2="500" y2="312" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
   </g>
-</svg>
+</svg>'''
+    return svg
+
+if __name__ == '__main__':
+    svg_data = generate_perfect_logo_lighthouse_svg(1500)
+    with open('/workspace/lighthouse_transparent.svg', 'w', encoding='utf-8') as f:
+        f.write(svg_data)
+    cairosvg.svg2png(url='/workspace/lighthouse_transparent.svg', write_to='/workspace/lighthouse_transparent.png', output_width=1500, output_height=1500)
+    print("Exported updated lighthouse_transparent.svg & .png")
