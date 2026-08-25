@@ -8,6 +8,8 @@ generate_detailed_lighthouse.py
 generate_lighthouse.py
 generate_master_cover.py
 generate_screenshot_matched_cover.py
+generate_exact_crop_cover.py
+image_uncropped_1080p.png
 lighthouse_detailed.*
 lighthouse_test.*
 render_cover.py
