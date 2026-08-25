@@ -8,13 +8,13 @@
       "weight": "ExtraBold",
       "weight_axis": 800,
       "usage_ru": "Большой шрифт для названия: заголовок обложки, логотип",
-      "sample": "Английский маяк"
+      "sample": "АНГЛИЙСКИЙ МАЯК"
     },
     "body": {
       "family": "Open Sans",
       "file": "fonts/OpenSans.ttf",
-      "weight": "Regular",
-      "weight_axis": 400,
+      "weight": "Bold",
+      "weight_axis": 700,
       "usage_ru": "Маленький шрифт: подзаголовок, описания, поясняющий текст",
       "sample": "подготовка к ОГЭ и ЕГЭ по английскому языку"
     }
@@ -22,7 +22,7 @@
   "cover": {
     "size": [1920, 768],
     "formats": ["PNG", "JPG"],
-    "title": "Английский маяк:",
+    "title": "АНГЛИЙСКИЙ МАЯК",
     "subtitle": "подготовка к ОГЭ и ЕГЭ по английскому языку",
     "alignment": "Заголовок ровно по центру над подзаголовком",
     "title_color": "#FFFFFF",
@@ -108,7 +108,7 @@
     "cover_background": ["sea", "dark_teal"],
     "cover_text": "white",
     "cover_title_font": "Sofia Sans Condensed ExtraBold",
-    "cover_body_font": "Open Sans Regular",
+    "cover_body_font": "Open Sans Bold",
     "lighthouse": "white",
     "lighthouse_beams": "gold",
     "logo_primary": "dark_teal"

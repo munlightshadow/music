@@ -10,6 +10,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent
+LOGO_EMBLEM = ROOT / "assets" / "logo-emblem.png"
 ASSETS_LIGHTHOUSE = Path("/opt/cursor/artifacts/assets/vk-cover-sea-lighthouse.png")
 FALLBACK_LIGHTHOUSE = Path("/tmp/lighthouse-extract.png")
 FONTS = ROOT / "fonts"
@@ -17,7 +18,7 @@ FONT_TITLE = str(FONTS / "SofiaSansCondensed.ttf")
 FONT_BODY = str(FONTS / "OpenSans.ttf")
 
 W, H = 1920, 768
-TITLE_TEXT = "Английский маяк:"
+TITLE_TEXT = "АНГЛИЙСКИЙ МАЯК"
 SUBTITLE_TEXT = "подготовка к ОГЭ и ЕГЭ по английскому языку"
 
 
@@ -117,7 +118,7 @@ def build_memo() -> Image.Image:
     body_lg = load_font(FONT_BODY, 28, "Regular")
     caption = load_font(FONT_BODY, 18, "Regular")
     sample_title = load_font(FONT_TITLE, 64, "ExtraBold")
-    sample_body = load_font(FONT_BODY, 32, "Regular")
+    sample_body = load_font(FONT_BODY, 32, "Bold")
 
     pad = 56
     y = 48
@@ -137,13 +138,13 @@ def build_memo() -> Image.Image:
             "kicker": "Большой — для названия",
             "name": "Sofia Sans Condensed",
             "meta": "Начертание ExtraBold · заголовок обложки, логотип",
-            "sample": "Английский маяк",
+            "sample": "АНГЛИЙСКИЙ МАЯК",
             "sample_font": sample_title,
         },
         {
             "kicker": "Маленький — для пояснения",
             "name": "Open Sans",
-            "meta": "Начертание Regular · подзаголовок, описания",
+            "meta": "Начертание Bold · подзаголовок, описания",
             "sample": "подготовка к ОГЭ и ЕГЭ по английскому языку",
             "sample_font": sample_body,
         },
@@ -202,9 +203,9 @@ def build_memo() -> Image.Image:
     rounded_rect(draw, (pad, y, mw - pad, y + 220), C["dark_teal"], 20)
     rules = [
         "Размер: 1920 × 768 px · формат PNG или JPG",
-        "Название: Sofia Sans Condensed ExtraBold, белый #FFFFFF",
-        "Подзаголовок: Open Sans Regular, белый #FFFFFF",
-        "Выравнивание: «Английский маяк» ровно по центру над «подготовка…»",
+        "Название: Sofia Sans Condensed ExtraBold, белый #FFFFFF · АНГЛИЙСКИЙ МАЯК",
+        "Подзаголовок: Open Sans Bold, белый #FFFFFF",
+        "Выравнивание: «АНГЛИЙСКИЙ МАЯК» ровно по центру над «подготовка…»",
         "Фон: море #488DA0 → #214149 → #1A333A · маяк справа снизу, лучи #C19B4F",
     ]
     ry = y + 24
@@ -215,146 +216,153 @@ def build_memo() -> Image.Image:
     return img
 
 
-def extract_lighthouse() -> Image.Image:
-    if ASSETS_LIGHTHOUSE.exists():
-        src = Image.open(ASSETS_LIGHTHOUSE).convert("RGB")
-        src_arr = np.array(src)
-        rgb = src_arr.astype(np.int16)
-        brightness = rgb.mean(axis=2)
-        keep = (brightness > 70) | (
-            (rgb[:, :, 0] > 140) & (rgb[:, :, 1] > 90) & (rgb[:, :, 0] > rgb[:, :, 2] + 20)
-        )
-        x0, y0, x1, y1 = 1040, 520, 1520, 1008
-        crop_rgb = src_arr[y0:y1, x0:x1]
-        crop_keep = keep[y0:y1, x0:x1]
-        alpha_img = Image.fromarray((crop_keep.astype(np.uint8) * 255), "L")
-        alpha_img = alpha_img.filter(ImageFilter.MaxFilter(7)).filter(ImageFilter.GaussianBlur(5))
-        alpha_arr = np.array(alpha_img).astype(np.float32)
-        crop = crop_rgb.astype(np.int16)
-        is_sea = (crop.mean(axis=2) < 58) & ~(
-            (crop[:, :, 0] > 115) & (crop[:, :, 0] > crop[:, :, 2] + 12)
-        )
-        alpha_arr[is_sea] *= 0.05
-        lh = Image.fromarray(crop_rgb, "RGB").convert("RGBA")
-        lh.putalpha(Image.fromarray(np.clip(alpha_arr, 0, 255).astype(np.uint8), "L"))
-        bbox = lh.getbbox()
-        lh = lh.crop(bbox)
-    else:
-        lh = Image.open(FALLBACK_LIGHTHOUSE).convert("RGBA")
+def _logo_inside_mask(arr: np.ndarray) -> np.ndarray:
+    """Circle of the emblem, from the teal sky/sea (ignores the white page)."""
+    rgb = arr.astype(np.int16)
+    teal = (rgb[:, :, 2] > rgb[:, :, 0] + 16) & (rgb[:, :, 1] > rgb[:, :, 0] + 6)
+    ys, xs = np.where(teal)
+    cy, cx = float(np.median(ys)), float(np.median(xs))
+    r = float(np.percentile(np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2), 99.2))
+    yy, xx = np.ogrid[: arr.shape[0], : arr.shape[1]]
+    return (yy - cy) ** 2 + (xx - cx) ** 2 <= (r * 0.995) ** 2
 
-    arr = np.array(lh).astype(np.float32)
-    rgb, alpha = arr[:, :, :3], arr[:, :, 3]
+
+def logo_sky_sea() -> tuple[np.ndarray, np.ndarray]:
+    src = Image.open(LOGO_EMBLEM).convert("RGB")
+    arr = np.array(src)
+    inside = _logo_inside_mask(arr)
+    rgb = arr.astype(np.int16)
+    brightness = rgb.mean(axis=2)
+    teal = (rgb[:, :, 2] > rgb[:, :, 0] + 18) & (rgb[:, :, 1] > rgb[:, :, 0] + 8)
+    ys, xs = np.where(inside)
+    y0, y1 = int(ys.min()), int(ys.max())
+    split = y0 + int((y1 - y0) * 0.62)
+    sky_px = arr[inside & teal & (np.arange(arr.shape[0])[:, None] < split)]
+    sea_px = arr[inside & teal & (np.arange(arr.shape[0])[:, None] >= split)]
+    if len(sky_px) == 0:
+        sky = np.array(C["teal_horizon"], dtype=np.float32)
+    else:
+        sky = np.median(sky_px, axis=0).astype(np.float32)
+    if len(sea_px) == 0:
+        sea = np.array(C["dark_teal"], dtype=np.float32)
+    else:
+        sea = np.median(sea_px, axis=0).astype(np.float32)
+    return sky, sea
+
+
+def extract_lighthouse() -> Image.Image:
+    src_path = LOGO_EMBLEM if LOGO_EMBLEM.exists() else ASSETS_LIGHTHOUSE
+    src = Image.open(src_path).convert("RGB")
+    arr = np.array(src)
+    inside = _logo_inside_mask(arr) if src_path == LOGO_EMBLEM else np.ones(arr.shape[:2], bool)
+    rgb = arr.astype(np.int16)
+    brightness = rgb.mean(axis=2)
+    gold = (rgb[:, :, 0] > 155) & (rgb[:, :, 1] > 95) & (rgb[:, :, 0] > rgb[:, :, 2] + 22)
+    white_struct = (brightness > 205) & inside
+    dark_detail = (brightness < 55) & inside
+    white_d = Image.fromarray((white_struct.astype(np.uint8) * 255), "L").filter(ImageFilter.MaxFilter(9))
+    near_white = np.array(white_d) > 0
+    keep = gold | white_struct | (dark_detail & near_white)
+
+    # Drop the circular rim so we keep the lighthouse, not the emblem frame
+    yy, xx = np.ogrid[: arr.shape[0], : arr.shape[1]]
+    ys, xs = np.where(inside)
+    cy, cx = float(np.median(ys)), float(np.median(xs))
+    r = float(np.sqrt(((xs - cx) ** 2 + (ys - cy) ** 2).max()))
+    keep = keep & (((yy - cy) ** 2 + (xx - cx) ** 2) < (r * 0.90) ** 2)
+
+    alpha = Image.fromarray((keep.astype(np.uint8) * 255), "L")
+    alpha = alpha.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(1.1))
+    aa = np.array(alpha).astype(np.float32)
+    aa[~inside] = 0
+    # Drop leftover sky/sea teal from the alpha fringe
+    teal = (rgb[:, :, 2] > rgb[:, :, 0] + 18) & (rgb[:, :, 1] > rgb[:, :, 0] + 8) & (brightness < 190)
+    aa[teal] *= 0.04
+
+    lh = Image.fromarray(arr, "RGB").convert("RGBA")
+    lh.putalpha(Image.fromarray(np.clip(aa, 0, 255).astype(np.uint8), "L"))
+    bbox = lh.getbbox()
+    lh = lh.crop(bbox)
+
+    pixels = np.array(lh).astype(np.float32)
+    rgb, alpha = pixels[:, :, :3], pixels[:, :, 3]
     brightness = rgb.mean(axis=2)
     gold_mask = (
-        (rgb[:, :, 0] > 140)
-        & (rgb[:, :, 1] > 90)
-        & (rgb[:, :, 0] > rgb[:, :, 2] + 15)
+        (rgb[:, :, 0] > 150)
+        & (rgb[:, :, 1] > 95)
+        & (rgb[:, :, 0] > rgb[:, :, 2] + 18)
         & (alpha > 40)
     )
-    white_mask = (brightness > 170) & (alpha > 80) & ~gold_mask
+    white_mask = (brightness > 200) & (alpha > 80) & ~gold_mask
     gold_t = np.clip((brightness - 140) / 90.0, 0.0, 1.0)
-    gold_color = lerp(C["muted_gold"], C["gold_light"], gold_t[:, :, None])
-    rgb[gold_mask] = gold_color[gold_mask]
+    rgb[gold_mask] = lerp(C["muted_gold"], C["gold_light"], gold_t[:, :, None])[gold_mask]
     rgb[white_mask] = np.array(C["white"], dtype=np.float32)
-    window = (brightness < 90) & (alpha > 160) & ~gold_mask
-    rgb[window] = np.array(C["dark_teal"], dtype=np.float32)
     out = np.dstack([np.clip(rgb, 0, 255), np.clip(alpha, 0, 255)]).astype(np.uint8)
     lh = Image.fromarray(out, "RGBA")
-    target_h = 290
+    bbox = lh.getbbox()
+    lh = lh.crop(bbox)
+    target_h = 280
     scale = target_h / lh.height
     return lh.resize((max(1, int(lh.width * scale)), target_h), Image.Resampling.LANCZOS)
 
 
 def build_sea() -> Image.Image:
-    yy = np.linspace(0.0, 1.0, H, dtype=np.float32)[:, None]
-    xx = np.linspace(0.0, 1.0, W, dtype=np.float32)[None, :]
+    """Expand the logo circle's sky/sea blues across the 1920x768 banner."""
+    sky, sea = logo_sky_sea()
     col = np.zeros((H, W, 3), dtype=np.float32)
-    mid_stop = 0.48
-    t = yy[:, 0]
-    top = np.array(C["teal_horizon"], dtype=np.float32)
-    mid = np.array(C["dark_teal"], dtype=np.float32)
-    bot = np.array(C["teal_deep"], dtype=np.float32)
+    # Same split as the emblem: sky occupies the upper ~62%, water the rest
+    split = 0.62
+    t = np.linspace(0.0, 1.0, H, dtype=np.float32)
     for i, ti in enumerate(t):
-        if ti < mid_stop:
-            col[i] = lerp(top, mid, ti / mid_stop)
+        if ti < split:
+            # keep sky almost flat, like the solid fill in the logo
+            col[i] = sky
         else:
-            col[i] = lerp(mid, bot, (ti - mid_stop) / (1.0 - mid_stop))
+            u = (ti - split) / (1.0 - split)
+            col[i] = lerp(sky, sea, u ** 0.7)
 
-    cx, cy = 0.46, 0.36
-    r = np.sqrt(((xx - cx) * 1.2) ** 2 + ((yy - cy) * 1.55) ** 2)
-    lift = np.clip(1.0 - r / 0.95, 0.0, 1.0) ** 1.4
-    medium = np.array(C["medium_teal"], dtype=np.float32)
-    lift3 = lift[:, :, None]
-    col = col * (1.0 - 0.12 * lift3) + medium * (0.12 * lift3)
-
-    vign_t = np.clip((r - 0.18) / 1.05, 0.0, 1.0) ** 1.15
-    deep = np.array(C["teal_deep"], dtype=np.float32)
-    col = col * (1.0 - 0.28 * vign_t[:, :, None]) + deep * (0.28 * vign_t[:, :, None])
-
-    horizon = np.exp(-((yy - 0.58) ** 2) / (2 * 0.018 ** 2))
-    pastel = np.array(C["light_pastel_blue"], dtype=np.float32)
-    col = col * (1.0 - 0.07 * horizon[:, :, None]) + pastel * (0.07 * horizon[:, :, None])
-
-    for amp, freq, phase, yband in (
-        (1.0, 1.7, 0.0, 0.80),
-        (0.7, 2.6, 1.1, 0.87),
-        (0.5, 3.3, 2.0, 0.93),
-    ):
-        wave = (np.sin((xx * freq + phase) * np.pi * 2) * 0.5 + 0.5) * amp
-        band = np.exp(-((yy - yband) ** 2) / 0.005)
-        mix = np.clip(wave * band * 0.045, 0, 1)
-        col = col * (1.0 - mix[:, :, None]) + medium * mix[:, :, None]
-
+    # Soft side vignette using the sea color so the wide banner doesn't feel empty
+    xx = np.linspace(0.0, 1.0, W, dtype=np.float32)[None, :]
+    edge = np.clip(np.maximum(0.08 - xx, xx - 0.92) / 0.08, 0, 1)
+    col = col * (1.0 - 0.12 * edge[:, :, None]) + sea * (0.12 * edge[:, :, None])
     return Image.fromarray(np.clip(col, 0, 255).astype(np.uint8), "RGB")
 
 
 def draw_cover_text(canvas: Image.Image, lighthouse_left: int) -> None:
     draw = ImageDraw.Draw(canvas)
-    title_font = load_font(FONT_TITLE, 96, "ExtraBold")
-    sub_font = load_font(FONT_BODY, 42, "Regular")
+    # All caps: Sofia's lowercase к is a Latin k with an ascender.
+    # The logo itself uses АНГЛИЙСКИЙ МАЯК, so the title matches it.
+    title_font = load_font(FONT_TITLE, 88, "ExtraBold")
+    sub_font = load_font(FONT_BODY, 50, "Bold")
     white = (*C["white"], 255)
     shadow = (*C["teal_deep"], 160)
 
-    title_core = "Английский маяк"  # center these letters; colon hangs to the right
-    title_w = ink_width(title_font, title_core)
-    sub_w = ink_width(sub_font, SUBTITLE_TEXT)
+    title_w = title_font.getlength(TITLE_TEXT)
+    sub_w = sub_font.getlength(SUBTITLE_TEXT)
     block_w = max(title_w, sub_w)
 
-    # Shared horizontal center: the words «Английский маяк» sit exactly
-    # above the midpoint of «подготовка…».
     cx = W / 2
-    half = block_w / 2
-    if cx + half > lighthouse_left - 40:
-        cx = lighthouse_left - 40 - half
+    if cx + block_w / 2 > lighthouse_left - 48:
+        cx = max(block_w / 2 + 36, lighthouse_left - 48 - block_w / 2)
 
-    title_x = centered_x(cx, title_font, title_core)
-    sub_x = centered_x(cx, sub_font, SUBTITLE_TEXT)
+    title_x = cx - title_w / 2
+    sub_x = cx - sub_w / 2
 
-    title_b = title_font.getbbox(TITLE_TEXT)
-    core_b = title_font.getbbox(title_core)
-    sub_b = sub_font.getbbox(SUBTITLE_TEXT)
-    title_h = title_b[3] - title_b[1]
+    ascent, _d = title_font.getmetrics()
+    sub_ascent, _sd = sub_font.getmetrics()
     gap = 56
-
-    # Vertically: keep the pair in the upper-middle of the 1920x768 cover
-    block_h = title_h + gap + (sub_b[3] - sub_b[1])
-    y0 = int(round(H * 0.30 - block_h / 2))
-    title_y = y0 - title_b[1]
-    sub_y = title_y + title_b[3] + gap - sub_b[1]
+    top = H * 0.30 - (ascent + gap + sub_ascent) / 2
+    title_baseline = top + ascent
+    sub_baseline = title_baseline + gap + sub_ascent
 
     for dx, dy in ((0, 3), (3, 3)):
-        draw.text((title_x + dx, title_y + dy), TITLE_TEXT, font=title_font, fill=shadow)
-        draw.text((sub_x + dx, sub_y + dy), SUBTITLE_TEXT, font=sub_font, fill=shadow)
-    draw.text((title_x, title_y), TITLE_TEXT, font=title_font, fill=white)
-    draw.text((sub_x, sub_y), SUBTITLE_TEXT, font=sub_font, fill=white)
+        draw.text((title_x + dx, title_baseline + dy), TITLE_TEXT, font=title_font, fill=shadow, anchor="ls")
+        draw.text((sub_x + dx, sub_baseline + dy), SUBTITLE_TEXT, font=sub_font, fill=shadow, anchor="ls")
+    draw.text((title_x, title_baseline), TITLE_TEXT, font=title_font, fill=white, anchor="ls")
+    draw.text((sub_x, sub_baseline), SUBTITLE_TEXT, font=sub_font, fill=white, anchor="ls")
 
-    title_center = title_x + (core_b[0] + core_b[2]) / 2
-    sub_center = sub_x + (sub_b[0] + sub_b[2]) / 2
-    print(
-        f"align cx={cx:.1f} title_core_center={title_center:.1f} sub_center={sub_center:.1f} "
-        f"delta={abs(title_center - sub_center):.2f}px"
-    )
-    print(f"title x={title_x} core_w={title_w}  sub x={sub_x} w={sub_w}")
+    print(f"align cx={cx:.1f} title_w={title_w:.1f} sub_w={sub_w:.1f}")
+    print(f"title_x={title_x:.1f} sub_x={sub_x:.1f} lh_left={lighthouse_left}")
 
 
 def build_cover() -> Image.Image:
@@ -407,7 +415,10 @@ def main() -> None:
         zf.write(ROOT / "angliyskiy-mayak-1920x768.jpg", "oblozhka-vk-1920x768.jpg")
         zf.write(ROOT / "pamyatka.png", "pamyatka.png")
         zf.write(ROOT / "palette.png", "palette.png")
-    shutil.copy(zip_path, artifacts / "oblozhka-vk-angliyskiy-mayak.zip")
+    try:
+        shutil.copy(zip_path, artifacts / "oblozhka-vk-angliyskiy-mayak.zip")
+    except OSError:
+        pass
     print("wrote memo, palette and cover", cover.size, memo.size)
 
 
