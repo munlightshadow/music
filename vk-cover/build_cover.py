@@ -252,8 +252,7 @@ def logo_sky_sea() -> tuple[np.ndarray, np.ndarray]:
     return sky, sea
 
 
-def extract_lighthouse() -> Image.Image:
-    """White lighthouse from the logo, plus a front black silhouette layer."""
+def _logo_lighthouse_rgba() -> Image.Image:
     src = Image.open(LOGO_EMBLEM).convert("RGB")
     arr = np.array(src)
     rgb = arr.astype(np.int16)
@@ -279,47 +278,62 @@ def extract_lighthouse() -> Image.Image:
     aa = np.array(alpha).astype(np.float32)
     aa[teal] *= 0.03
     aa[~inside] = 0
-    white_lh = Image.fromarray(arr, "RGB").convert("RGBA")
-    white_lh.putalpha(Image.fromarray(np.clip(aa, 0, 255).astype(np.uint8), "L"))
-    white_lh = white_lh.crop(white_lh.getbbox())
+    rgba = Image.fromarray(arr, "RGB").convert("RGBA")
+    rgba.putalpha(Image.fromarray(np.clip(aa, 0, 255).astype(np.uint8), "L"))
+    return rgba.crop(rgba.getbbox())
 
+
+def extract_lighthouse() -> Image.Image:
+    """Same lighthouse mask twice: white matching back, black silhouette in front."""
+    white_lh = _logo_lighthouse_rgba()
     px = np.array(white_lh)
     al = px[:, :, 3]
-    gold2 = (px[:, :, 0] > 155) & (px[:, :, 1] > 95) & (px[:, :, 0] > px[:, :, 2] + 20) & (al > 40)
+    p = px.astype(np.int16)
+    # int16: uint8 `R > B + 45` wraps and classifies the white tower as gold.
+    gold2 = (p[:, :, 0] > 170) & (p[:, :, 1] > 110) & (p[:, :, 0] > p[:, :, 2] + 45) & (al > 40)
     body = (al > 40) & ~gold2
-    black = np.zeros_like(px)
-    black[body, 0] = 8
-    black[body, 1] = 10
-    black[body, 2] = 12
-    black[body, 3] = px[body, 3]
-    black_im = Image.fromarray(black, "RGBA")
 
-    ox, oy = 56, 20
-    canvas = Image.new("RGBA", (white_lh.width + ox, white_lh.height + oy), (0, 0, 0, 0))
-    canvas.alpha_composite(white_lh, (ox, 0))
-    canvas.alpha_composite(black_im, (0, oy))
+    present = body.any(axis=1)
+    ys = np.where(present)[0]
+    y_hi = int(ys[-1]) + 1 if len(ys) else body.shape[0]
+    for i in range(len(ys) - 1):
+        if ys[i + 1] - ys[i] > 8:
+            y_hi = int(ys[i]) + 1
+            break
+    water = body & (np.arange(body.shape[0])[:, None] >= y_hi)
+    tower = body & ~water
 
-    # White outline so the black front silhouette reads on the dark sea
-    alpha = canvas.split()[-1]
-    ring = alpha.filter(ImageFilter.MaxFilter(9))
-    ring_arr = np.array(ring).astype(np.int16)
-    core = np.array(alpha).astype(np.int16)
-    outline = np.clip(ring_arr - core, 0, 255).astype(np.uint8)
-    outline_img = Image.fromarray(outline, "L").filter(ImageFilter.GaussianBlur(0.9))
-    stroke = Image.new("RGBA", canvas.size, (255, 255, 255, 0))
-    stroke.putalpha(outline_img)
-    canvas = Image.alpha_composite(stroke, canvas)
+    rim = 6
+    h, w = body.shape
+    cw, ch = w + rim * 2, h + rim * 2
+    origin = (rim, rim)
+
+    padded = Image.new("L", (cw, ch), 0)
+    padded.paste(Image.fromarray(np.where(body, 255, 0).astype(np.uint8), "L"), origin)
+    rim_a = padded.filter(ImageFilter.MaxFilter(rim * 2 + 1)).filter(ImageFilter.GaussianBlur(0.7))
+    white_back = Image.new("RGBA", (cw, ch), (255, 255, 255, 0))
+    white_back.putalpha(rim_a)
+
+    black = np.zeros((h, w, 4), np.uint8)
+    black[tower] = (12, 14, 16, 255)
+
+    gold_px = np.zeros((h, w, 4), np.uint8)
+    gold_px[gold2] = px[gold2]
+
+    water_px = np.zeros((h, w, 4), np.uint8)
+    water_px[water] = (255, 255, 255, 255)
+
+    canvas = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+    canvas.alpha_composite(white_back, (0, 0))
+    canvas.alpha_composite(Image.fromarray(black, "RGBA"), origin)
+    canvas.alpha_composite(Image.fromarray(gold_px, "RGBA"), origin)
+    canvas.alpha_composite(Image.fromarray(water_px, "RGBA"), origin)
 
     pixels = np.array(canvas).astype(np.float32)
     rgb, alpha = pixels[:, :, :3], pixels[:, :, 3]
-    brightness = rgb.mean(axis=2)
-    gold_mask = (
-        (rgb[:, :, 0] > 150)
-        & (rgb[:, :, 1] > 95)
-        & (rgb[:, :, 0] > rgb[:, :, 2] + 18)
-        & (alpha > 40)
-    )
-    gold_t = np.clip((brightness - 140) / 90.0, 0.0, 1.0)
+    r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+    gold_mask = (r > 170) & (g > 110) & (r > b + 45) & (alpha > 40)
+    gold_t = np.clip((rgb.mean(axis=2) - 140) / 90.0, 0.0, 1.0)
     rgb[gold_mask] = lerp(C["muted_gold"], C["gold_light"], gold_t[:, :, None])[gold_mask]
     out = np.dstack([np.clip(rgb, 0, 255), np.clip(alpha, 0, 255)]).astype(np.uint8)
     lh = Image.fromarray(out, "RGBA")
@@ -388,6 +402,7 @@ def draw_cover_text(canvas: Image.Image, lighthouse_left: int) -> None:
 def build_cover() -> Image.Image:
     sea = build_sea().convert("RGBA")
     lh = extract_lighthouse()
+    lh.save(LAYERED_LIGHTHOUSE, "PNG")
     pad_r, pad_b = 56, 22
     lx = W - lh.width - pad_r
     ly = H - lh.height - pad_b
