@@ -3,6 +3,15 @@ __pycache__/
 *.pyc
 
 # Temporary test files
-*_test.*
-*v1*.*
-*v2*.*
+generate_cover_variants.py
+generate_detailed_lighthouse.py
+generate_lighthouse.py
+generate_master_cover.py
+generate_screenshot_matched_cover.py
+lighthouse_detailed.*
+lighthouse_test.*
+render_cover.py
+vk_cover_v1*
+vk_cover_v2*
+vk_cover.png
+vk_cover.jpg
