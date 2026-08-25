@@ -11,6 +11,8 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent
 LOGO_EMBLEM = ROOT / "assets" / "logo-emblem.png"
+LAYERED_LIGHTHOUSE = ROOT / "assets" / "logo-lighthouse-layered.png"
+SEA_SOURCE = ROOT / "assets" / "sea-source.png"
 ASSETS_LIGHTHOUSE = Path("/opt/cursor/artifacts/assets/vk-cover-sea-lighthouse.png")
 FALLBACK_LIGHTHOUSE = Path("/tmp/lighthouse-extract.png")
 FONTS = ROOT / "fonts"
@@ -251,40 +253,64 @@ def logo_sky_sea() -> tuple[np.ndarray, np.ndarray]:
 
 
 def extract_lighthouse() -> Image.Image:
-    src_path = LOGO_EMBLEM if LOGO_EMBLEM.exists() else ASSETS_LIGHTHOUSE
-    src = Image.open(src_path).convert("RGB")
+    """White lighthouse from the logo, plus a front black silhouette layer."""
+    src = Image.open(LOGO_EMBLEM).convert("RGB")
     arr = np.array(src)
-    inside = _logo_inside_mask(arr) if src_path == LOGO_EMBLEM else np.ones(arr.shape[:2], bool)
     rgb = arr.astype(np.int16)
     brightness = rgb.mean(axis=2)
     gold = (rgb[:, :, 0] > 155) & (rgb[:, :, 1] > 95) & (rgb[:, :, 0] > rgb[:, :, 2] + 22)
-    white_struct = (brightness > 205) & inside
-    dark_detail = (brightness < 55) & inside
-    white_d = Image.fromarray((white_struct.astype(np.uint8) * 255), "L").filter(ImageFilter.MaxFilter(9))
-    near_white = np.array(white_d) > 0
-    keep = gold | white_struct | (dark_detail & near_white)
-
-    # Drop the circular rim so we keep the lighthouse, not the emblem frame
-    yy, xx = np.ogrid[: arr.shape[0], : arr.shape[1]]
-    ys, xs = np.where(inside)
+    teal = (
+        (rgb[:, :, 2] > rgb[:, :, 0] + 16)
+        & (rgb[:, :, 1] > rgb[:, :, 0] + 6)
+        & (brightness < 200)
+        & ~gold
+    )
+    ys, xs = np.where(teal)
     cy, cx = float(np.median(ys)), float(np.median(xs))
-    r = float(np.sqrt(((xs - cx) ** 2 + (ys - cy) ** 2).max()))
-    keep = keep & (((yy - cy) ** 2 + (xx - cx) ** 2) < (r * 0.90) ** 2)
+    r = float(np.percentile(np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2), 99.2))
+    yy, xx = np.ogrid[: arr.shape[0], : arr.shape[1]]
+    inside = (yy - cy) ** 2 + (xx - cx) ** 2 <= (r * 0.93) ** 2
+    white = (brightness > 200) & inside
+    dark = (brightness < 80) & inside & ~teal
+    keep = (gold | white | dark) & inside
 
     alpha = Image.fromarray((keep.astype(np.uint8) * 255), "L")
-    alpha = alpha.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(1.1))
+    alpha = alpha.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.7))
     aa = np.array(alpha).astype(np.float32)
+    aa[teal] *= 0.03
     aa[~inside] = 0
-    # Drop leftover sky/sea teal from the alpha fringe
-    teal = (rgb[:, :, 2] > rgb[:, :, 0] + 18) & (rgb[:, :, 1] > rgb[:, :, 0] + 8) & (brightness < 190)
-    aa[teal] *= 0.04
+    white_lh = Image.fromarray(arr, "RGB").convert("RGBA")
+    white_lh.putalpha(Image.fromarray(np.clip(aa, 0, 255).astype(np.uint8), "L"))
+    white_lh = white_lh.crop(white_lh.getbbox())
 
-    lh = Image.fromarray(arr, "RGB").convert("RGBA")
-    lh.putalpha(Image.fromarray(np.clip(aa, 0, 255).astype(np.uint8), "L"))
-    bbox = lh.getbbox()
-    lh = lh.crop(bbox)
+    px = np.array(white_lh)
+    al = px[:, :, 3]
+    gold2 = (px[:, :, 0] > 155) & (px[:, :, 1] > 95) & (px[:, :, 0] > px[:, :, 2] + 20) & (al > 40)
+    body = (al > 40) & ~gold2
+    black = np.zeros_like(px)
+    black[body, 0] = 8
+    black[body, 1] = 10
+    black[body, 2] = 12
+    black[body, 3] = px[body, 3]
+    black_im = Image.fromarray(black, "RGBA")
 
-    pixels = np.array(lh).astype(np.float32)
+    ox, oy = 56, 20
+    canvas = Image.new("RGBA", (white_lh.width + ox, white_lh.height + oy), (0, 0, 0, 0))
+    canvas.alpha_composite(white_lh, (ox, 0))
+    canvas.alpha_composite(black_im, (0, oy))
+
+    # White outline so the black front silhouette reads on the dark sea
+    alpha = canvas.split()[-1]
+    ring = alpha.filter(ImageFilter.MaxFilter(9))
+    ring_arr = np.array(ring).astype(np.int16)
+    core = np.array(alpha).astype(np.int16)
+    outline = np.clip(ring_arr - core, 0, 255).astype(np.uint8)
+    outline_img = Image.fromarray(outline, "L").filter(ImageFilter.GaussianBlur(0.9))
+    stroke = Image.new("RGBA", canvas.size, (255, 255, 255, 0))
+    stroke.putalpha(outline_img)
+    canvas = Image.alpha_composite(stroke, canvas)
+
+    pixels = np.array(canvas).astype(np.float32)
     rgb, alpha = pixels[:, :, :3], pixels[:, :, 3]
     brightness = rgb.mean(axis=2)
     gold_mask = (
@@ -293,39 +319,33 @@ def extract_lighthouse() -> Image.Image:
         & (rgb[:, :, 0] > rgb[:, :, 2] + 18)
         & (alpha > 40)
     )
-    white_mask = (brightness > 200) & (alpha > 80) & ~gold_mask
     gold_t = np.clip((brightness - 140) / 90.0, 0.0, 1.0)
     rgb[gold_mask] = lerp(C["muted_gold"], C["gold_light"], gold_t[:, :, None])[gold_mask]
-    rgb[white_mask] = np.array(C["white"], dtype=np.float32)
     out = np.dstack([np.clip(rgb, 0, 255), np.clip(alpha, 0, 255)]).astype(np.uint8)
     lh = Image.fromarray(out, "RGBA")
     bbox = lh.getbbox()
     lh = lh.crop(bbox)
-    target_h = 280
+    target_h = 300
     scale = target_h / lh.height
     return lh.resize((max(1, int(lh.width * scale)), target_h), Image.Resampling.LANCZOS)
 
 
 def build_sea() -> Image.Image:
-    """Expand the logo circle's sky/sea blues across the 1920x768 banner."""
-    sky, sea = logo_sky_sea()
-    col = np.zeros((H, W, 3), dtype=np.float32)
-    # Same split as the emblem: sky occupies the upper ~62%, water the rest
-    split = 0.62
-    t = np.linspace(0.0, 1.0, H, dtype=np.float32)
-    for i, ti in enumerate(t):
-        if ti < split:
-            # keep sky almost flat, like the solid fill in the logo
-            col[i] = sky
-        else:
-            u = (ti - split) / (1.0 - split)
-            col[i] = lerp(sky, sea, u ** 0.7)
-
-    # Soft side vignette using the sea color so the wide banner doesn't feel empty
-    xx = np.linspace(0.0, 1.0, W, dtype=np.float32)[None, :]
-    edge = np.clip(np.maximum(0.08 - xx, xx - 0.92) / 0.08, 0, 1)
-    col = col * (1.0 - 0.12 * edge[:, :, None]) + sea * (0.12 * edge[:, :, None])
-    return Image.fromarray(np.clip(col, 0, 255).astype(np.uint8), "RGB")
+    """Use the original wide sea artwork (dark textured navy/teal)."""
+    src_path = SEA_SOURCE if SEA_SOURCE.exists() else ASSETS_LIGHTHOUSE
+    src = Image.open(src_path).convert("RGB")
+    sw, sh = src.size
+    crop_h = int(round(sw / (W / H)))
+    y0 = max(0, sh - crop_h)
+    base = src.crop((0, y0, sw, sh)).resize((W, H), Image.Resampling.LANCZOS)
+    arr = np.array(base).astype(np.float32)
+    # Cover the old white lighthouse on the right by extending nearby sea
+    donor = arr[:, 980:1180, :].copy()
+    for x in range(1240, W):
+        di = int((x * 0.41) % (donor.shape[1] - 1))
+        fade = min(1.0, (x - 1240) / 90.0)
+        arr[:, x, :] = arr[:, x, :] * (1.0 - fade) + donor[:, di, :] * fade
+    return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
 
 
 def draw_cover_text(canvas: Image.Image, lighthouse_left: int) -> None:
