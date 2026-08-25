@@ -394,6 +394,234 @@ def build_cover() -> Image.Image:
     return out
 
 
+def _instance_varfont(src: Path, dst: Path, **axes) -> Path:
+    from fontTools.ttLib import TTFont
+    from fontTools.varLib.instancer import instantiateVariableFont
+
+    font = TTFont(str(src))
+    instantiated = instantiateVariableFont(font, axes, overlap=True)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    instantiated.save(str(dst))
+    return dst
+
+
+def build_brand_pdf(path: Path) -> None:
+    """A4 PDF: both fonts with samples, every palette color and both gradients."""
+    from reportlab.lib.colors import HexColor, Color
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont as RLFont
+    from reportlab.pdfgen import canvas
+
+    font_dir = Path("/tmp/am-pdf-fonts")
+    sofia_eb = _instance_varfont(FONTS / "SofiaSansCondensed.ttf", font_dir / "SofiaSansCondensed-ExtraBold.ttf", wght=800)
+    sofia_bd = _instance_varfont(FONTS / "SofiaSansCondensed.ttf", font_dir / "SofiaSansCondensed-Bold.ttf", wght=700)
+    open_bd = _instance_varfont(FONTS / "OpenSans.ttf", font_dir / "OpenSans-Bold.ttf", wght=700)
+    open_rg = _instance_varfont(FONTS / "OpenSans.ttf", font_dir / "OpenSans-Regular.ttf", wght=400)
+    pdfmetrics.registerFont(RLFont("SofiaEB", str(sofia_eb)))
+    pdfmetrics.registerFont(RLFont("SofiaBD", str(sofia_bd)))
+    pdfmetrics.registerFont(RLFont("OpenBD", str(open_bd)))
+    pdfmetrics.registerFont(RLFont("OpenRG", str(open_rg)))
+
+    page_w, page_h = A4
+    c = canvas.Canvas(str(path), pagesize=A4)
+    c.setTitle("Английский маяк — шрифты и палитра")
+    c.setAuthor("Английский маяк")
+
+    deep = HexColor("#1A333A")
+    dark = HexColor("#214149")
+    white = HexColor("#FFFFFF")
+    gold = HexColor("#C19B4F")
+    gold_l = HexColor("#F3D593")
+    steel = HexColor("#A8B2BB")
+    pastel = HexColor("#A5D2DF")
+    margin = 36
+
+    def fill_page() -> None:
+        c.setFillColor(deep)
+        c.rect(0, 0, page_w, page_h, fill=1, stroke=0)
+
+    def y_from_top(top: float) -> float:
+        return page_h - top
+
+    def heading(text: str, top: float, size: float = 13) -> None:
+        c.setFillColor(gold_l)
+        c.setFont("SofiaBD", size)
+        c.drawString(margin, y_from_top(top), text)
+
+    def gold_rule(top: float) -> None:
+        c.setFillColor(gold)
+        c.rect(margin, y_from_top(top) - 1.5, page_w - 2 * margin, 2.2, fill=1, stroke=0)
+
+    def round_card(x: float, top: float, w: float, h: float, fill: Color) -> None:
+        c.setFillColor(fill)
+        c.roundRect(x, y_from_top(top + h), w, h, 10, fill=1, stroke=0)
+
+    def paint_gradient(x: float, y: float, w: float, h: float, start: str, end: str) -> None:
+        sr, sg, sb = hex_to_rgb(start)
+        er, eg, eb = hex_to_rgb(end)
+        steps = max(48, int(w))
+        for i in range(steps):
+            t = i / (steps - 1)
+            c.setFillColor(Color((sr + (er - sr) * t) / 255, (sg + (eg - sg) * t) / 255, (sb + (eb - sb) * t) / 255))
+            c.rect(x + w * i / steps, y, w / steps + 0.4, h, fill=1, stroke=0)
+
+    # --- Page 1: fonts ---
+    fill_page()
+    c.setFillColor(white)
+    c.setFont("SofiaEB", 28)
+    c.drawString(margin, y_from_top(52), "Английский маяк")
+    c.setFillColor(pastel)
+    c.setFont("OpenRG", 12)
+    c.drawString(margin, y_from_top(74), "Памятка: шрифты и палитра")
+    gold_rule(88)
+
+    heading("ШРИФТЫ", 118)
+    fonts_spec = [
+        (
+            "Большой — для названия",
+            PALETTE["fonts"]["title"]["family"],
+            f"Начертание {PALETTE['fonts']['title']['weight']} · ось веса {PALETTE['fonts']['title']['weight_axis']} · файл {PALETTE['fonts']['title']['file']}",
+            PALETTE["fonts"]["title"]["usage_ru"],
+            PALETTE["fonts"]["title"]["sample"],
+            "SofiaEB",
+            26,
+        ),
+        (
+            "Маленький — для пояснения",
+            PALETTE["fonts"]["body"]["family"],
+            f"Начертание {PALETTE['fonts']['body']['weight']} · ось веса {PALETTE['fonts']['body']['weight_axis']} · файл {PALETTE['fonts']['body']['file']}",
+            PALETTE["fonts"]["body"]["usage_ru"],
+            PALETTE["fonts"]["body"]["sample"],
+            "OpenBD",
+            14,
+        ),
+    ]
+    top = 138
+    card_h = 118
+    for kicker, family, meta, usage, sample, face, size in fonts_spec:
+        round_card(margin, top, page_w - 2 * margin, card_h, dark)
+        c.setFillColor(gold_l)
+        c.setFont("OpenRG", 9)
+        c.drawString(margin + 16, y_from_top(top + 20), kicker)
+        c.setFillColor(white)
+        c.setFont("SofiaBD", 16)
+        c.drawString(margin + 16, y_from_top(top + 42), family)
+        c.setFillColor(steel)
+        c.setFont("OpenRG", 9)
+        c.drawString(margin + 16, y_from_top(top + 60), meta)
+        c.drawString(margin + 16, y_from_top(top + 74), usage)
+        c.setFillColor(white)
+        c.setFont(face, size)
+        c.drawString(margin + 16, y_from_top(top + 102), sample)
+        top += card_h + 12
+
+    round_card(margin, top, page_w - 2 * margin, 92, dark)
+    c.setFillColor(gold_l)
+    c.setFont("SofiaBD", 12)
+    c.drawString(margin + 16, y_from_top(top + 22), "Как использовать")
+    c.setFillColor(white)
+    c.setFont("OpenRG", 10)
+    lines = [
+        "Заголовок обложки и логотипа: Sofia Sans Condensed ExtraBold, белый #FFFFFF, капитами: АНГЛИЙСКИЙ МАЯК.",
+        "Подзаголовок: Open Sans Bold, белый #FFFFFF: подготовка к ОГЭ и ЕГЭ по английскому языку.",
+        "Не набирать название строчными: в Sofia Sans Condensed буква «к» выглядит как латинская k.",
+        "Лицензия обоих шрифтов: SIL Open Font License 1.1.",
+    ]
+    ly = top + 40
+    for line in lines:
+        c.drawString(margin + 16, y_from_top(ly), line)
+        ly += 14
+
+    c.setFillColor(steel)
+    c.setFont("OpenRG", 8)
+    c.drawRightString(page_w - margin, 22, "1 / 2")
+    c.showPage()
+
+    # --- Page 2: full palette ---
+    fill_page()
+    c.setFillColor(white)
+    c.setFont("SofiaEB", 22)
+    c.drawString(margin, y_from_top(48), "Палитра логотипа")
+    c.setFillColor(pastel)
+    c.setFont("OpenRG", 10)
+    c.drawString(margin, y_from_top(66), "Все цвета из логотипа · HEX · RGB · назначение")
+    gold_rule(78)
+    heading("ЦВЕТА", 102)
+
+    colors = list(PALETTE["colors"].items())
+    cols = 2
+    gap = 10
+    usable = page_w - 2 * margin
+    card_w = (usable - gap) / cols
+    color_h = 62
+    top = 118
+    for i, (_key, item) in enumerate(colors):
+        col = i % cols
+        row = i // cols
+        x = margin + col * (card_w + gap)
+        t = top + row * (color_h + gap)
+        hex_value = item["hex"]
+        rgb = item["rgb"]
+        round_card(x, t, card_w, color_h, dark)
+        c.setFillColor(HexColor(hex_value))
+        c.roundRect(x + 8, y_from_top(t + color_h) + 8, 46, color_h - 16, 6, fill=1, stroke=0)
+        if hex_value.upper() == "#FFFFFF":
+            c.setStrokeColor(steel)
+            c.setLineWidth(0.6)
+            c.roundRect(x + 8, y_from_top(t + color_h) + 8, 46, color_h - 16, 6, fill=0, stroke=1)
+        c.setFillColor(white)
+        c.setFont("SofiaBD", 11)
+        c.drawString(x + 64, y_from_top(t + 20), item["name_ru"])
+        c.setFillColor(gold_l)
+        c.setFont("OpenBD", 9)
+        c.drawString(x + 64, y_from_top(t + 36), hex_value)
+        c.setFillColor(steel)
+        c.setFont("OpenRG", 8)
+        c.drawString(x + 128, y_from_top(t + 36), f"RGB {rgb[0]}, {rgb[1]}, {rgb[2]}")
+        c.drawString(x + 64, y_from_top(t + 50), item["usage_ru"])
+
+    rows = (len(colors) + cols - 1) // cols
+    top = 118 + rows * (color_h + gap) + 8
+    heading("ГРАДИЕНТЫ", top)
+    top += 18
+    grad_h = 58
+    for _key, item in PALETTE["gradients"].items():
+        start, end = item["stops"]
+        round_card(margin, top, page_w - 2 * margin, grad_h, dark)
+        paint_gradient(margin + 8, y_from_top(top + grad_h) + 8, 210, grad_h - 16, start, end)
+        c.setFillColor(white)
+        c.setFont("SofiaBD", 11)
+        c.drawString(margin + 230, y_from_top(top + 20), f"{start}  →  {end}")
+        c.setFillColor(steel)
+        c.setFont("OpenRG", 9)
+        direction = "сверху вниз" if "top" in item["direction"] else item["direction"]
+        c.drawString(margin + 230, y_from_top(top + 36), f"{item['usage']} · {direction}")
+        top += grad_h + 10
+
+    heading("ОБЛОЖКА ВК", top)
+    top += 16
+    cover = PALETTE["cover"]
+    round_card(margin, top, page_w - 2 * margin, 92, dark)
+    cover_lines = [
+        f"Размер: {cover['size'][0]} × {cover['size'][1]} px · формат {', '.join(cover['formats'])}",
+        f"Название: {PALETTE['usage']['cover_title_font']}, {cover['title_color']} · {cover['title']}",
+        f"Подзаголовок: {PALETTE['usage']['cover_body_font']}, {cover['subtitle_color']} · {cover['subtitle']}",
+        f"{cover['alignment']}. Маяк: справа снизу. Фон: градиент моря. Лучи: золотой градиент.",
+    ]
+    c.setFillColor(white)
+    c.setFont("OpenRG", 10)
+    ly = top + 22
+    for line in cover_lines:
+        c.drawString(margin + 16, y_from_top(ly), line)
+        ly += 16
+
+    c.setFillColor(steel)
+    c.setFont("OpenRG", 8)
+    c.drawRightString(page_w - margin, 22, "2 / 2")
+    c.save()
+
+
 def main() -> None:
     board = build_palette_board()
     board.save(ROOT / "palette.png", "PNG", optimize=True)
@@ -414,6 +642,9 @@ def main() -> None:
     cover.save(ROOT / "angliyskiy-mayak-1920x768.png", "PNG")
     cover.save(ROOT / "angliyskiy-mayak-1920x768.jpg", "JPEG", quality=98, subsampling=0)
 
+    pdf_path = ROOT / "pamyatka-shrifty-i-palitra.pdf"
+    build_brand_pdf(pdf_path)
+
     artifacts = Path("/opt/cursor/artifacts")
     artifacts.mkdir(parents=True, exist_ok=True)
     cover.save(artifacts / "oblozhka-vk-1920x768.png", "PNG")
@@ -421,8 +652,10 @@ def main() -> None:
     cover.save(artifacts / "angliyskiy-mayak-1920x768.png", "PNG")
     memo.save(artifacts / "pamyatka.png", "PNG")
     board.save(artifacts / "palette.png", "PNG")
-
     import shutil
+    shutil.copy(pdf_path, artifacts / "pamyatka-shrifty-i-palitra.pdf")
+    shutil.copy(pdf_path, artifacts / "pamyatka.pdf")
+
     import zipfile
 
     zip_path = ROOT / "oblozhka-vk-angliyskiy-mayak.zip"
@@ -431,11 +664,12 @@ def main() -> None:
         zf.write(ROOT / "angliyskiy-mayak-1920x768.jpg", "oblozhka-vk-1920x768.jpg")
         zf.write(ROOT / "pamyatka.png", "pamyatka.png")
         zf.write(ROOT / "palette.png", "palette.png")
+        zf.write(pdf_path, "pamyatka-shrifty-i-palitra.pdf")
     try:
         shutil.copy(zip_path, artifacts / "oblozhka-vk-angliyskiy-mayak.zip")
     except OSError:
         pass
-    print("wrote memo, palette and cover", cover.size, memo.size)
+    print("wrote memo, palette, pdf and cover", cover.size, memo.size, pdf_path)
 
 
 if __name__ == "__main__":
