@@ -3,14 +3,14 @@
     <!-- Gold Beam Gradients -->
     <linearGradient id="goldBeamL" x1="460" y1="365" x2="60" y2="365" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#F3D593" stop-opacity="0.95" />
-      <stop offset="35%" stop-color="#D4AF5F" stop-opacity="0.85" />
-      <stop offset="100%" stop-color="#C19B4F" stop-opacity="0.65" />
+      <stop offset="35%" stop-color="#D4AF5F" stop-opacity="0.88" />
+      <stop offset="100%" stop-color="#C19B4F" stop-opacity="0.70" />
     </linearGradient>
 
     <linearGradient id="goldBeamR" x1="540" y1="365" x2="940" y2="365" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#F3D593" stop-opacity="0.95" />
-      <stop offset="35%" stop-color="#D4AF5F" stop-opacity="0.85" />
-      <stop offset="100%" stop-color="#C19B4F" stop-opacity="0.65" />
+      <stop offset="35%" stop-color="#D4AF5F" stop-opacity="0.88" />
+      <stop offset="100%" stop-color="#C19B4F" stop-opacity="0.70" />
     </linearGradient>
 
     <radialGradient id="lampGlow" cx="50%" cy="50%" r="50%">
@@ -22,32 +22,32 @@
   </defs>
 
   <g id="designer_lighthouse_artwork">
-    <!-- 1. Gold Light Beams with Rounded Circular Arc Ends (matching circular badge) -->
-    <!-- Left Beam with rounded outer arc: (460,352) -> (88, 320) -> Arc to (58, 415) -> (460,378) -->
+    <!-- 1. Gold Light Beams with Circular Arc Outer Ends -->
+    <!-- Left Beam -->
     <path d="M 460 352 
-             L 88 320 
-             A 450 450 0 0 0 58 415 
+             L 92 322 
+             A 450 450 0 0 0 62 414 
              L 460 378 Z" 
           fill="url(#goldBeamL)" />
 
-    <!-- Right Beam with rounded outer arc: (540,352) -> (912, 320) -> Arc to (942, 415) -> (540,378) -->
+    <!-- Right Beam -->
     <path d="M 540 352 
-             L 912 320 
-             A 450 450 0 0 1 942 415 
+             L 908 322 
+             A 450 450 0 0 1 938 414 
              L 540 378 Z" 
           fill="url(#goldBeamR)" />
 
     <!-- 2. Water Reflection Wave Lines (Under the island) -->
     <g stroke-linecap="round">
-      <line x1="240" y1="672" x2="760" y2="672" stroke="#214149" stroke-width="4.5" />
-      <line x1="290" y1="681" x2="710" y2="681" stroke="#2E5864" stroke-width="4" />
-      <line x1="350" y1="690" x2="650" y2="690" stroke="#468A9D" stroke-width="3.5" />
+      <line x1="250" y1="672" x2="750" y2="672" stroke="#214149" stroke-width="4.5" />
+      <line x1="300" y1="681" x2="700" y2="681" stroke="#2E5864" stroke-width="4" />
+      <line x1="355" y1="690" x2="645" y2="690" stroke="#468A9D" stroke-width="3.5" />
       <line x1="410" y1="698" x2="590" y2="698" stroke="#A5D2DF" stroke-width="3" />
       <line x1="460" y1="706" x2="540" y2="706" stroke="#A5D2DF" stroke-width="2.5" />
     </g>
 
     <!-- 3. Rocky Island Base -->
-    <!-- Dark Teal Main Rock (#214149) -->
+    <!-- Dark Teal Main Rock Body (#214149) -->
     <path d="M 315 668 
              C 335 648, 370 638, 405 636 
              C 422 628, 440 622, 458 620 
@@ -74,7 +74,7 @@
              C 460 648, 425 655, 355 658 Z" 
           fill="#A5D2DF" />
 
-    <!-- Pure White Top Island Ledge (#FFFFFF) -->
+    <!-- Pure White Top Island Highlight Ledge (#FFFFFF) -->
     <path d="M 425 636 
              C 442 624, 462 620, 480 620 
              L 520 620 
@@ -92,10 +92,10 @@
     <!-- Bottom Entryway Door (Arched) -->
     <path d="M 488 620 L 488 574 C 488 568, 512 568, 512 574 L 512 620 Z" fill="#214149" />
     
-    <!-- Middle Arched Window -->
+    <!-- Middle Arched Window (Right side) -->
     <path d="M 506 512 L 506 488 C 506 483, 520 483, 520 488 L 520 512 C 520 516, 506 516, 506 512 Z" fill="#214149" />
 
-    <!-- Upper Arched Window -->
+    <!-- Upper Arched Window (Right side) -->
     <path d="M 506 446 L 506 426 C 506 422, 518 422, 518 426 L 518 446 C 518 449, 506 449, 506 446 Z" fill="#214149" />
 
     <!-- 5. Balcony / Gallery Platform (y=384..392) -->
