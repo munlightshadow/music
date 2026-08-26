@@ -3,6 +3,9 @@ __pycache__/
 *.pyc
 
 # Temporary test files
+extract_silhouette.py
+extracted_page*
+generate_dark_silhouette_cover.py
 test_curved_beams*
 lighthouse_curved_beams*
 test_designer_svg*
