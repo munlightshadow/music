@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+
+# Temporary test files
+extract_silhouette.py
+extracted_page*
+generate_dark_silhouette_cover.py
+test_curved_beams*
+lighthouse_curved_beams*
+test_designer_svg*
+lighthouse_designer_exact*
+lighthouse_designer_v2*
+lighthouse_designer_v3*
+generate_cover_variants.py
+generate_detailed_lighthouse.py
+generate_lighthouse.py
+generate_master_cover.py
+generate_screenshot_matched_cover.py
+generate_exact_crop_cover.py
+image_uncropped_1080p.png
+lighthouse_detailed.*
+lighthouse_test.*
+render_cover.py
+vk_cover_v1*
+vk_cover_v2*
+vk_cover.png
+vk_cover.jpg
