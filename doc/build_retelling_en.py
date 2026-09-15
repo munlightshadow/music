@@ -162,9 +162,150 @@ def main():
             continue
         add_para(doc, ln, size=14, indent=True)
 
+    core = doc.core_properties
+    core.author = ""
+    core.last_modified_by = ""
+    core.comments = ""
+    core.title = (
+        "Foundations of the Spiritual and Moral Culture of the Peoples of Russia. "
+        "Grade 5. A retelling"
+    )
+
     doc.save(OUT)
+    strip_word_locks(OUT)
+    write_rtf(ROOT / "ODNKNR_5_klass_retelling_en.rtf", lines)
     print("saved", OUT, "paragraphs", len(doc.paragraphs))
+
+
+def strip_word_locks(path: Path) -> None:
+    """Remove thumbnail/customXml leftovers and any protection flags Word may honor."""
+    import io
+    import zipfile
+    from datetime import datetime, timezone
+    from lxml import etree
+
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    EP = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"
+    CP = "http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
+    DCTERMS = "http://purl.org/dc/terms/"
+    REL = "http://schemas.openxmlformats.org/package/2006/relationships"
+    CT = "http://schemas.openxmlformats.org/package/2006/content-types"
+
+    skip = {
+        "docProps/thumbnail.jpeg",
+        "word/stylesWithEffects.xml",
+        "customXml/item1.xml",
+        "customXml/itemProps1.xml",
+        "customXml/_rels/item1.xml.rels",
+    }
+    buf = io.BytesIO()
+    with zipfile.ZipFile(path, "r") as zin, zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zout:
+        for info in zin.infolist():
+            name = info.filename
+            if name in skip or name.startswith("customXml/"):
+                continue
+            data = zin.read(name)
+
+            if name == "word/settings.xml":
+                root = etree.fromstring(data)
+                for tag in (
+                    f"{{{W}}}documentProtection",
+                    f"{{{W}}}writeProtection",
+                    f"{{{W}}}revisionView",
+                    f"{{{W}}}savePreviewPicture",
+                ):
+                    for el in root.findall(tag):
+                        root.remove(el)
+                data = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+            elif name == "docProps/app.xml":
+                root = etree.fromstring(data)
+                ns = {"ep": EP}
+                app = root.find("ep:Application", ns)
+                if app is not None:
+                    app.text = "Microsoft Office Word"
+                sec = root.find("ep:DocSecurity", ns)
+                if sec is not None:
+                    sec.text = "0"
+                else:
+                    el = etree.SubElement(root, f"{{{EP}}}DocSecurity")
+                    el.text = "0"
+                data = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+            elif name == "docProps/core.xml":
+                root = etree.fromstring(data)
+                now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                for tag in (f"{{{DCTERMS}}}created", f"{{{DCTERMS}}}modified"):
+                    el = root.find(tag)
+                    if el is not None:
+                        el.text = now
+                desc = root.find("{http://purl.org/dc/elements/1.1/}description")
+                if desc is not None:
+                    desc.text = ""
+                data = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+            elif name == "_rels/.rels":
+                root = etree.fromstring(data)
+                for rel in list(root):
+                    target = rel.get("Target", "")
+                    if "thumbnail" in target:
+                        root.remove(rel)
+                data = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+            elif name == "word/_rels/document.xml.rels":
+                root = etree.fromstring(data)
+                for rel in list(root):
+                    target = rel.get("Target", "")
+                    rtype = rel.get("Type", "")
+                    if "customXml" in target or "stylesWithEffects" in target or "customXml" in rtype:
+                        root.remove(rel)
+                data = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+            elif name == "[Content_Types].xml":
+                root = etree.fromstring(data)
+                for el in list(root):
+                    part = el.get("PartName", "")
+                    if "customXml" in part or "stylesWithEffects" in part or part.endswith("thumbnail.jpeg"):
+                        root.remove(el)
+                data = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+            zout.writestr(name, data)
+
+    path.write_bytes(buf.getvalue())
+
+
+def rtf_escape(text: str) -> str:
+    out = []
+    for ch in text:
+        o = ord(ch)
+        if ch in "\\{}":
+            out.append("\\" + ch)
+        elif ch == "\n":
+            out.append("\\par\n")
+        elif o < 128:
+            out.append(ch)
+        else:
+            signed = o if o <= 32767 else o - 65536
+            out.append(f"\\u{signed}?")
+    return "".join(out)
+
+
+def write_rtf(path: Path, lines: list[str]) -> None:
+    parts = [
+        r"{\rtf1\ansi\deff0\nouicompat",
+        r"{\fonttbl{\f0 Times New Roman;}}",
+        r"\viewkind4\uc1\pard\sa160\sl276\slmult1\f0\fs28 ",
+    ]
+    for ln in lines:
+        parts.append(rtf_escape(ln) + r"\par" + "\n")
+    parts.append("}\n")
+    path.write_text("".join(parts), encoding="ascii", errors="strict")
+    print("saved", path)
 
 
 if __name__ == "__main__":
     main()
+    ru = ROOT / "ODNKNR_5_klass_pereskaz.docx"
+    if ru.exists():
+        strip_word_locks(ru)
+        print("unlocked", ru)
